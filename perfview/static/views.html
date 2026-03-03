@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        <link rel="stylesheet" href="/static/element-ui.css">
+        <link rel="icon" href="/static/favicon.jpg" sizes="32x32" />
+        <style type="text/css">
+            #addition-ui{padding: 20px}
+            .card-search-input{width: 350px;}
+            .el-card__body{padding: 10px}
+            .el-table__body-wrapper tr{cursor: pointer;}
+            .el-table .cell{line-height: 17px; font-size: 15px;}
+        </style>
+        <title>View List</title>
+        <script type="text/javascript" src="/static/vue.js"></script>
+        <script type="text/javascript" src="/static/element-ui.js"></script>
+    </head>
+    <body>
+        <div id="addition-ui">
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <el-input ref="search_card_keywords_input" class="card-search-input" @keypress.enter.native="do_search" v-model="search_card.keywords" placeholder="Enter the keywords to search."></el-input>
+                    <el-button class="card-search-btn" @click="do_search" type="success">Search</el-button>
+                </div>
+                <div>
+                    <el-table v-loading="search_card.loading" @row-click="navigate_to_view" :data="search_card.search_views" height="600" style="width: 100%" border stripe>
+                        <el-table-column prop="idd" label="ID" width="80"></el-table-column>
+                        <el-table-column prop="name" label="Name" width="300"></el-table-column>
+                        <el-table-column prop="virtual_folder" label="Folder" width="250"></el-table-column>
+                        <el-table-column prop="update_time" label="Update Time" width="200"></el-table-column>
+                        <el-table-column prop="view_type" label="Type" width="120"></el-table-column>
+                        <el-table-column prop="meta_data.description" label="Description"></el-table-column>
+                    </el-table>
+                    <div style="margin-top: 10px">
+                        <el-pagination
+                          @size-change="search_card_size_change"
+                          @current-change="search_card_current_change"
+                          :current-page.sync="search_card.current_page"
+                          :page-size="search_card.pagesize"
+                          :current-page="search_card.page"
+                          layout="total, prev, pager, next, jumper"
+                          :total="search_card.total"
+                          hide-on-single-page>
+                        </el-pagination>
+                    </div>
+                </div>
+            </el-card>
+        </div>
+        <script type="module" src="/static/views.js"></script>
+    </body>
+</html>

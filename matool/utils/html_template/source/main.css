@@ -1,0 +1,160 @@
+/* 设置整个页面高度和背景颜色 */
+        body {
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            font-family: Arial, sans-serif; /* 使用指定字体 */
+        }
+
+        /* 设置页头样式 */
+        header {
+            background-color: #0074d9;
+            color: white;
+/*            padding: 20px;*/
+            text-align: center;
+            height: 12vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        header h1{
+            font-size: 2vw;
+        }
+
+        /* 设置按钮容器样式 */
+        .button-container {
+            text-align: center;
+            margin-top: 0.5vw;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+/*            background-color: black;*/
+        }
+
+        .layerout-buttons{
+            /* width: 50%; */
+            margin-left: 10vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: right;
+        }
+
+        .function-buttons{
+            /* width: 70%; */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+
+
+        /* 设置按钮样式 */
+        .LayoutButton {
+            display: flex;
+            background-color: #0074d9;
+            color: white;
+            border: none;
+            height:2.5vw;
+            padding: 0.5vw 2vw;
+            font-size: 1vw;
+            font-weight: bold;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            cursor: pointer;
+            border-radius: 0.5vw;
+            margin: 0.5vw; /* 间距 */
+            box-shadow: 0vw 0.2vw 0.3vw rgba(0, 0, 0, 0.5); /* 按钮阴影效果 */
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+    
+
+        /* 鼠标悬浮时放大按钮 */
+        .LayoutButton:hover {
+            transform: scale(1.03);
+            box-shadow: 0vw 0.2vw 0.3vw rgba(0, 0, 0, 0.7);
+        }
+
+        /* 设置网格容器，3列自动适应行布局 */
+
+
+        #gridContainer{
+            margin-top:0.5vw;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(auto-fill, 1fr);
+            gap: 0.5vw;
+/*            padding: 0.5v;*/
+            /*overflow-y: auto;
+            overflow*/-x: auto;
+            background-color: #f0f0f0;
+        }
+
+        #gridContainer-0{
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+/*            grid-template-rows: repeat(auto-fill, 1fr);*/
+            gap: 1.5vw;
+            padding: 1vw;
+/*            overflow-y: auto;*/
+            background-color: #f0f0f0;
+        }
+
+        /* 设置单元格样式 */
+        .grid-item-0 {
+            width: auto;
+            height: 30vh;
+            background-color: #f0f0f0;
+            border-radius: 2.5vw;
+        }
+
+        .image-link{
+            text-decoration: none;
+        }
+
+        .button-link{
+            text-decoration: none;
+            color: white;
+            font-size: 1vw;
+        }
+
+        /* 设置标题文本的样式 */
+        .image-title {
+            font-size: 1.25vw; /* 设置字体大小 */
+            color: #333; /* 设置文本颜色 */
+            font-weight: bold; /* 加粗文本 */
+            margin-bottom: 0.5vw;
+            text-align: center; /* 文本居中对齐 */
+            text-transform: uppercase; /* 将文本转换为大写 */
+            letter-spacing: 0.05vw; /* 字母间距 */
+            font-family: 'Arial', sans-serif; /* 指定字体 */
+            text-shadow: 0.05vw 0.05vw 0.05vw rgba(0, 0, 0, 0.5); /* 文本阴影效果 */
+            background-color: white; /* 文本背景颜色 */
+            border-radius: 0.5vw; /* 圆角边框 */
+            box-shadow: 0.vw 0.1vw 0.2vw rgba(0, 0, 0, 0.2); /* 按钮阴影效果 */
+            text-decoration: none;
+        }
+
+        .image-title:hover {
+            transform: scale(1.02);
+            box-shadow: 0.vw 0.1vw 0.1vw rgba(0, 0, 0, 0.3);
+        }
+
+        /* 悬浮效果 */
+        .iframe-item{
+            background-color: white;
+            border: none;
+            border-radius: 0.5vw; /* 圆角边框 */
+            box-shadow: 0vw 0.2vw 0.4vw rgba(0, 0, 0, 0.2); /* 按钮阴影效果 */
+            transition: transform 0.1s;
+        }
+
+        /* 悬浮效果 */
+        .iframe-item:hover {
+            transform: scale(1.001);
+            box-shadow: 0vw 0.2vw 0.4vw rgba(0, 0, 0, 0.3);
+        }

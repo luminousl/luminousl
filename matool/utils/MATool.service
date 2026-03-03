@@ -1,0 +1,14 @@
+[Unit]
+Description=MATool service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=sudo -u cmcserver bash -c "/home/cmcserver/miniconda3/envs/matool/bin/python /home/cmcserver/MATool_deploy/MATool/utils/post.py"
+ExecStop=/usr/bin/kill -9 `pgrep post.py`
+RestartSec=1min
+KillMode=control-group
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

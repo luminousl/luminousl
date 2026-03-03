@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MATool-模型分析工具-HomePage</title>
+    <link rel="stylesheet" type="text/css" href="source/homepage.css">
+</head>
+<body>
+    <header>
+        <h1>模型分析报告摘要</h1>
+    </header>
+
+
+    <div class="button-container">
+        <div class="layerout-buttons">
+        </div>
+
+        <div class="function-buttons">
+            <a href="MATool.html" class="button-link">
+                <button id="toggleLayout6" class="LayoutButton">
+                    报告摘要
+                </button>
+            </a>
+            <a href="source/MATool_report.html" class="button-link">
+                <button id="toggleLayout6" class="LayoutButton">
+                    详细报告
+                </button>
+            </a>
+            <a href="source/MATool_visualization.html" class="button-link">
+                <button id="toggleLayout6" class="LayoutButton">
+                    图表分析
+                </button>
+            </a>
+            <a href="./reports/report4.html" class="button-link" target="_blank">
+                <button id="toggleLayout5"  class="LayoutButton">
+                    算子信息
+                </button>
+            </a>
+        </div>
+
+        <div class="layerout-buttons">
+        </div>
+    </div>
+    <div class="grid-container-0">
+        <div class="grid-container-1" id="gridContainer-1-1">
+            <div class="grid-container-1"  id="gridContainer-1-1-1">
+            <!-- 此处将动态生成HTML文件列表 -->
+            </div>
+        </div>
+
+        <div class="grid-container-1" id="gridContainer-1-2">
+            <p class="image-title">【左：TRT结构可视化】【右：TRT数据流可视化】</p>
+            <div class="grid-container-1" id="gridContainer-1-2-0">
+                <a href="structure/engine.html" target="_blank" class="image-link">
+                    <!-- <p class="image-title">TRT模型结构可视化</p> -->
+                    <div class="image-wrapper">
+                        <img src="structure/engine.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+                <a href="structure/engine2.html" target="_blank" class="image-link">
+                    <!-- <p class="image-title">TRT数据流可视化(TRT Engine SVG)</p> -->
+                    <div class="image-wrapper">
+                        <img src="structure/engine2.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+            </div>
+
+            <div class="grid-container-1" id="gridContainer-1-2-1">
+                <a href="graphs/算子延迟测算(type).html" target="_blank" title="点击打开放大" class="image-link">
+                <div class="grid-item-3">
+                    <p  class="image-title">算子延迟测算</p>
+                    <!-- <div class="inframeContainer"> -->
+                    <div class="placeholder">
+                    <iframe src="graphs/算子延迟测算(type).html" width="100%" height="100%" class="iframe-item"></iframe>
+                    </div>
+                </div>
+                </a>
+                <div class="grid-item-3">
+                    <a href="graphs/算子数量统计(type+precision).html" target="_blank" title="点击打开放大" class="image-link">
+                        <p  class="image-title">算子数量统计</p>
+                        <iframe src="graphs/算子数量统计(type+precision).html" width="100%" height="100%" class="iframe-item"></iframe>
+                        <div class="placeholder"></div>
+                    </a>
+                </div>
+
+                <div class="grid-item-3">
+                    <a href="reports/report8.html" target="_blank" title="点击打开放大" class="image-link">
+                        <p  class="image-title">冗余算子统计</p>
+                        <!-- <div class="inframeContainer"> -->
+                        <iframe src="reports/report8.html" width="100%" height="100%" class="iframe-item"></iframe>
+                        <div class="placeholder"></div>
+                        <!-- </div> -->
+                    </a>
+                </div>
+                <div class="grid-item-3">
+                    <a href="graphs/算子分析饼图.html" target="_blank" title="点击打开放大" class="image-link">
+                        <p  class="image-title">算子分析饼图</p>
+                        <iframe src="graphs/算子分析饼图.html" width="100%" height="100%" class="iframe-item"></iframe>
+                        <div class="placeholder"></div>
+                    </a>
+                </div>
+            
+            </div>
+            
+        </div>
+
+        <script>
+            const gridContainer = document.getElementById('gridContainer-1-1-1');
+
+            // 定义HTML文件列表
+            const htmlFiles = [
+                { name: 'report1.html', title: '模型静态属性' },
+                { name: 'report2.html', title: '模型推理分析' },
+            ];
+
+            var viewportWidth = window.innerWidth;
+            var viewportHeight = window.innerHeight;
+
+            console.log("Viewport Width: " + viewportWidth);
+            console.log("Viewport Height: " + viewportHeight);
+
+            // 页面加载后，生成HTML文件列表
+            function generateHTMLFileList() {
+                // 清空网格容器
+                // gridContainer.innerHTML = '';
+
+                // 为每个HTML文件创建一个网格项
+                htmlFiles.forEach(file => {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = './reports/' + file.name;
+                    iframe.width = '100%';
+                    iframe.height = '100%';
+                    iframe.className = 'iframe-item-text'
+                    iframe.style.whiteSpace = 'nowrap;'
+                    // iframe.style.border = 'none;'
+
+                    const gridItem = document.createElement('div');
+                    gridItem.className = 'grid-item-1';
+                    gridItem.appendChild(iframe);
+
+                    const anchor = document.createElement('a');
+                    anchor.href = './reports/' + file.name;
+                    anchor.target = '_blank';
+                    anchor.className = 'image-link'
+
+
+                    const titleElement = document.createElement('p');
+                    titleElement.textContent = `${file.title}`;  //添加标题内容
+                    titleElement.classList.add('image-title'); // 添加类名
+                    anchor.appendChild(titleElement);
+
+
+                    anchor.appendChild(gridItem);
+
+                    gridContainer.appendChild(anchor);
+                });
+            }
+
+            // 页面加载后，生成HTML文件列表
+            window.addEventListener('DOMContentLoaded', generateHTMLFileList);
+        </script>
+    </div>
+</body>
+</html>

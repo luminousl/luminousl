@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <style>
+   html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    .highlight {
+        background-color: yellow;
+        border: 2px solid red;
+    }
+
+    :root {
+        --scale-factor-df: 0.8; /* dataframe缩放倍数 */
+        --scale-factor-svg: 0.65; /* 模型svg缩放倍数 */
+    }
+
+    #div_top {
+        width: 100%;
+        height: 6%;
+        overflow: auto;
+        display: flex;
+    }
+    
+    #div_down {
+        width: 100%;
+        height: 94%;
+        overflow: auto;
+        display: flex;
+    }
+    
+    #div_top > div {
+        flex: 1;
+    }
+
+    #div_top > #top1 {
+        flex: 30;
+        text-align: center;
+    }
+
+    #div_top > #top2 {
+        flex: 40;
+        text-align: center;
+    }
+
+    #div_top > #top3 {
+        flex: 30;
+        text-align: center;
+    }
+    
+    #div_down > div {
+        flex: 1;
+        overflow: hidden;
+    }
+    
+    #div_down > #down1 {
+        flex: 15%;
+    }
+    
+    #div_down > #down2 {
+        flex: 40%;
+    }
+    
+    #div_down > #down3 {
+        flex: 40%;
+    }
+    
+    #div_down > #down4 {
+        flex: 15%;
+    }
+    
+    #trt_svg,#opt_svg {
+        width: calc(100% / var(--scale-factor-svg));
+        height: calc(100% / var(--scale-factor-svg));
+        transform: scale(var(--scale-factor-svg));
+        transform-origin: 0 0;
+    }
+    #opt_df,#trt_df {
+        width: calc(100% / var(--scale-factor-df));
+        height: calc(100% / var(--scale-factor-df));
+        transform: scale(var(--scale-factor-df));
+        transform-origin: 0 0;
+    }
+  </style>
+ </head>
+ <body>
+  <div id="div_top">
+   <div id="top1">
+    <a>
+     模型：
+     <strong id="model_name_trt">
+      trt.trt
+     </strong>
+    </a>
+    <br/>
+    <a>
+     差异算子个数：
+     <strong id="num_op_trt">
+      10000000
+     </strong>
+    </a>
+   </div>
+   <div id="top2">
+    <a>
+     点击列表跳转到对应算子位置，另一侧跳转到共有上游算子处
+    </a>
+    <br/>
+    <a>
+     共有算子个数：
+     <strong id="num_op_public">
+      10000000
+     </strong>
+    </a>
+   </div>
+   <div id="top3">
+    <a>
+     模型：
+     <strong id="model_name_opt">
+      opt.trt
+     </strong>
+    </a>
+    <br/>
+    <a>
+     差异算子个数：
+     <strong id="num_op_opt">
+      10000000
+     </strong>
+    </a>
+   </div>
+  </div>
+  <div id="div_down">
+   <div id="down1">
+    <iframe id="trt_df" scrolling="yes" src="./trt.html">
+    </iframe>
+   </div>
+   <div id="down2">
+    <iframe id="trt_svg" scrolling="yes" src="./trt.svg">
+    </iframe>
+   </div>
+   <div id="down3">
+    <iframe id="opt_svg" scrolling="yes" src="./opt.svg">
+    </iframe>
+   </div>
+   <div id="down4">
+    <iframe id="opt_df" scrolling="yes" src="./opt.html">
+    </iframe>
+   </div>
+  </div>
+  <script>
+   function scrollToElementTRT(id) {
+          var iframe = document.getElementById("trt_svg");
+          var innerDoc = iframe.contentDocument;
+          var target = innerDoc.getElementById(id);
+          target.scrollIntoView();
+    }
+    function scrollToElementOPT(id) {
+        var iframe = document.getElementById("opt_svg");
+        var innerDoc = iframe.contentDocument;
+        var target = innerDoc.getElementById(id);
+        target.scrollIntoView();
+    }
+  </script>
+ </body>
+</html>

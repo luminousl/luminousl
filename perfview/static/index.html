@@ -1,0 +1,288 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        <link rel="stylesheet" href="/static/element-ui.css">
+        <link rel="icon" href="/static/favicon.jpg" sizes="32x32" />
+        <style type="text/css">
+            #addition-ui{padding: 50px}
+            .box-card{margin-bottom: 20px}
+            .el-card__body{padding: 10px}
+            .attachement-btn{width: 200px; height: 180px}
+            .title-area{width: 200px; height: 180px; user-select: none; line-height: 180px; vertical-align: middle; text-align: center;}
+            .setup-file-dlg .el-dialog__body{padding: 10px}
+            .setup-file-dlg .el-dialog__footer{padding: 0 10px 10px 10px}
+            .setup-file-dlg .el-dialog__header{padding: 10px 20px 0px 20px}
+            .create-view-dlg .el-dialog__body{padding: 10px}
+            .create-view-dlg .el-dialog__footer{padding: 0 10px 10px 10px}
+            .create-view-dlg .el-dialog__header{padding: 10px 20px 0px 20px}
+            .setup-path-projection-dlg .el-dialog__body{padding: 10px}
+            .setup-path-projection-dlg .el-dialog__footer{padding: 0 10px 10px 10px}
+            .setup-path-projection-dlg .el-dialog__header{padding: 10px 20px 0px 20px}
+            .el-tabs__nav-scroll{user-select: none;}
+            .file-browser-area{cursor: pointer; user-select: none; text-align: center; padding: 80px 0; border: 1px dashed #05f; color: #aaa}
+            .progress-title{white-space: break-spaces; word-break: break-all; display: inline-block; text-align: center;}
+            .card-open-btn{float: right}
+            .btn-required{background-color: rgb(255, 237, 237);}
+            .attachment-btn-has-file{background-color: rgb(237, 255, 235);}
+            .el-progress-bar__innerText{color: #fff !important}
+            .btn-disable{background-color: #aaa !important; border-color: #aaa !important}
+            .el-form-item{margin-bottom: 0;}
+            .buttons-bar{display: flex; margin-top: 10px}
+            .buttons-bar-first{margin-top: 0}
+            .button-open-nvbug-token-page{cursor: pointer}
+            .button-open-nvbug-token-page:hover{color: #000; font-weight: bold}
+        </style>
+        <script type="text/javascript" src="/static/vue.js"></script>
+        <script type="text/javascript" src="/static/element-ui.js"></script>
+        <script type="text/javascript" src="/static/spark-md5.js"></script>
+    </head>
+    <body>
+        <div id="addition-ui">
+            <input style="display: none;" type="file" id="file-broswer" accept="*" ref="file_broswer"/>
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                  <span>ONNX View</span>
+                  <el-button ref="open_onnx_view" class="card-open-btn" @click="open_onnx_view" type="success">
+                    Open
+                  </el-button>
+                </div>
+                <div class="buttons-bar buttons-bar-first">
+                    <div class="title-area">
+                        <span>Required File:</span>
+                    </div>
+                    <div style="display: flex;">
+                        <el-button class="attachement-btn btn-required" :class="{'attachment-btn-has-file': btn_progress.onnx_model.file_id != null}" @click="setup_onnx_model" @drop.native="setup_file_ondrop($event, btn_progress.onnx_model)" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-plus"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.onnx_model.title}}</div>
+                            <div :style="{display: (btn_progress.onnx_model.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.onnx_model.progress"></el-progress>
+                            </div>
+                        </el-button>
+                        <el-button class="attachement-btn" @click.stop="with_kernel_match_report=!with_kernel_match_report">
+                            <el-switch
+                                style="pointer-events: none;"
+                                v-model="with_kernel_match_report"
+                                active-color="#13ce66"
+                                inactive-color="#ff4949">
+                            </el-switch> <br><br>
+                            <div class="progress-title">{{ with_kernel_match_report ? "Comparison Enabled" : "Comparison Disabled" }}</div>
+                        </el-button>
+                    </div>
+                </div>
+                <div class="buttons-bar">
+                    <div class="title-area">
+                        <span>Profile A Files:</span>
+                    </div>
+                    <div style="display: flex;">
+                        <el-button class="attachement-btn" :class="{'attachment-btn-has-file': btn_progress.onnx_layerinfo.file_id != null}" @click="setup_onnx_layerinfo" @drop.native="setup_file_ondrop($event, btn_progress.onnx_layerinfo)" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-plus"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.onnx_layerinfo.title}}</div>
+                            <div :style="{display: (btn_progress.onnx_layerinfo.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.onnx_layerinfo.progress"></el-progress>
+                            </div>
+                        </el-button>
+                        <el-button class="attachement-btn" :class="{'attachment-btn-has-file': btn_progress.onnx_profile.file_id != null}" @click="setup_onnx_profile" @drop.native="setup_file_ondrop($event, btn_progress.onnx_profile)" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-plus"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.onnx_profile.title}}</div>
+                            <div :style="{display: (btn_progress.onnx_profile.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.onnx_profile.progress"></el-progress>
+                            </div>
+                        </el-button>
+                        <el-button class="attachement-btn" :class="{'attachment-btn-has-file': btn_progress.trtperf.file_id != null}" @click="setup_trtperf" @drop.native="setup_file_ondrop($event, btn_progress.trtperf)" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-plus"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.trtperf.title}}</div>
+                            <div :style="{display: (btn_progress.trtperf.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.trtperf.progress"></el-progress>
+                            </div>
+                        </el-button>
+                        <el-button class="attachement-btn" @click="profile_layers_setup_from_logfile" @drop.native="setup_file_ondrop($event, btn_progress.onnx_profile_layers_from_logfile, [profile_layers_setup_from_logfile_request_files, config_profile_layers_for_onnx])" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-copy-document"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.onnx_profile_layers_from_logfile.title}}</div>
+                            <div :style="{display: (btn_progress.onnx_profile_layers_from_logfile.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.onnx_profile_layers_from_logfile.progress"></el-progress>
+                            </div>
+                        </el-button>
+                    </div>
+                </div>
+                <div class="buttons-bar" v-if="with_kernel_match_report">
+                    <div class="title-area">
+                        <span>Profile B Files:</span>
+                    </div>
+                    <div style="display: flex;">
+                        <el-button class="attachement-btn" :class="{'attachment-btn-has-file': btn_progress.onnx_layerinfo_compared.file_id != null}" @click="setup_onnx_layerinfo_compared" @drop.native="setup_file_ondrop($event, btn_progress.onnx_layerinfo_compared)" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-plus"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.onnx_layerinfo_compared.title}}</div>
+                            <div :style="{display: (btn_progress.onnx_layerinfo_compared.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.onnx_layerinfo_compared.progress"></el-progress>
+                            </div>
+                        </el-button>
+                        <el-button class="attachement-btn" :class="{'attachment-btn-has-file': btn_progress.onnx_profile_compared.file_id != null}" @click="setup_onnx_profile_compared" @drop.native="setup_file_ondrop($event, btn_progress.onnx_profile_compared)" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-plus"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.onnx_profile_compared.title}}</div>
+                            <div :style="{display: (btn_progress.onnx_profile_compared.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.onnx_profile_compared.progress"></el-progress>
+                            </div>
+                        </el-button>
+                        <el-button class="attachement-btn" :class="{'attachment-btn-has-file': btn_progress.trtperf_compared.file_id != null}" @click="setup_trtperf_compared" @drop.native="setup_file_ondrop($event, btn_progress.trtperf_compared)" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-plus"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.trtperf_compared.title}}</div>
+                            <div :style="{display: (btn_progress.trtperf_compared.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.trtperf_compared.progress"></el-progress>
+                            </div>
+                        </el-button>
+                        <el-button class="attachement-btn" @click="profile_layers_setup_from_logfile_compared" @drop.native="setup_file_ondrop($event, btn_progress.onnx_profile_layers_from_logfile_compared, [profile_layers_setup_from_logfile_request_files, config_profile_layers_for_onnx_compared])" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-copy-document"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.onnx_profile_layers_from_logfile_compared.title}}</div>
+                            <div :style="{display: (btn_progress.onnx_profile_layers_from_logfile_compared.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.onnx_profile_layers_from_logfile_compared.progress"></el-progress>
+                            </div>
+                        </el-button>
+                    </div>
+                </div>
+            </el-card>
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                  <span>Trex View</span>
+                  <el-button class="card-open-btn" @click="open_trex_view" type="success">
+                    Open
+                  </el-button>
+                </div>
+                <div class="buttons-bar buttons-bar-first">
+                    <div class="title-area">
+                        <span>Profile Files:</span>
+                    </div>
+                    <div style="display: flex;">
+                        <el-button class="attachement-btn btn-required" :class="{'attachment-btn-has-file': btn_progress.trex_layerinfo.file_id != null}" @click="setup_trex_layerinfo" @drop.native="setup_file_ondrop($event, btn_progress.trex_layerinfo)" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-plus"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.trex_layerinfo.title}}</div>
+                            <div :style="{display: (btn_progress.trex_layerinfo.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.trex_layerinfo.progress"></el-progress>
+                            </div>
+                        </el-button>
+                        <el-button class="attachement-btn" :class="{'attachment-btn-has-file': btn_progress.trex_profile.file_id != null}" @click="setup_trex_profile" @drop.native="setup_file_ondrop($event, btn_progress.trex_profile)" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-plus"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.trex_profile.title}}</div>
+                            <div :style="{display: (btn_progress.trex_profile.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.trex_profile.progress"></el-progress>
+                            </div>
+                        </el-button>
+                        <el-button class="attachement-btn" @click="trex_profile_layers_setup_from_logfile" @drop.native="setup_file_ondrop($event, btn_progress.trex_profile_layers_from_logfile, [profile_layers_setup_from_logfile_request_files, config_profile_layers_for_trex])" @dragover.native="setup_file_dragover">
+                            <div style="padding: 5px 30px; font-size: 60px;"><i class="el-icon-copy-document"></i></div><br/>
+                            <div class="progress-title">{{btn_progress.trex_profile_layers_from_logfile.title}}</div>
+                            <div :style="{display: (btn_progress.trex_profile_layers_from_logfile.show ? 'block' : 'none')}">
+                                <el-progress :stroke-width="26" :text-inside="true" :percentage="btn_progress.trex_profile_layers_from_logfile.progress"></el-progress>
+                            </div>
+                        </el-button>
+                    </div>
+                </div>
+            </el-card>
+            <el-dialog class="create-view-dlg" title="Create a view" :visible.sync="create_view_dlg.show" width="50%" :close-on-click-modal="false">
+                <el-form>
+                    <el-form-item label="Name">
+                      <el-input v-model="create_view_dlg.view_name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="Folder">
+                      <el-input v-model="create_view_dlg.folder"></el-input>
+                    </el-form-item>
+                    <el-form-item label="Description">
+                      <el-input v-model="create_view_dlg.description"></el-input>
+                    </el-form-item>
+                    <div style="text-align: right; margin-top: 10px">
+                        <el-button type="primary" @click="confirm_create_a_view">Confirm</el-button>
+                    </div>
+                </el-form>
+            </el-dialog>
+            <el-dialog class="setup-path-projection-dlg" title="Setup path projection" :visible.sync="setup_path_projection_dlg.show" width="50%" :close-on-click-modal="false">
+                <el-form>
+                    <el-form-item label="Projection Code">
+                        <el-input type="textarea" rows="10" ref="setup_path_projection_dlg_projection_code" v-model="setup_path_projection_dlg.projection_code"></el-input>
+                    </el-form-item>
+                </el-form>
+                <div style=" margin-top: 10px; text-align: right;">
+                    <el-button type="default" @click="cancel_setup_path_projection">Cancel</el-button>
+                    <el-button type="primary" @click="confirm_setup_path_projection">Confirm</el-button>
+                </div>
+            </el-dialog>
+            <el-dialog class="setup-file-dlg" title="Setup a file" :visible.sync="setup_file_dlg.show" width="50%" :close-on-click-modal="false">
+                <el-tabs type="border-card" @tab-click="setup_file_dlg_tabclick" v-model="setup_file_dlg.tab_value">
+                    <el-tab-pane label="Upload" name="Upload">
+                        <el-form>
+                            <el-form-item label="Name">
+                                <el-input v-model="setup_file_dlg.file_name"></el-input>
+                              </el-form-item>
+                            <el-form-item label="Folder">
+                              <el-input v-model="setup_file_dlg.folder"></el-input>
+                            </el-form-item>
+                            <el-form-item label="Description">
+                              <el-input v-model="setup_file_dlg.description"></el-input>
+                            </el-form-item>
+                        </el-form>
+                        <div :style="{display: (setup_file_dlg.upload.show ? 'none' : 'block')}" @click="setup_file_do_open_file_browser" @drop="setup_file_ondrop($event, setup_file_dlg.upload, [setup_file_on_file_drag_uploaded])" @dragover="setup_file_dragover" class="file-browser-area">
+                            <div style="padding: 30px 30px; font-size: 80px;">
+                                <i class="el-icon-plus"></i>
+                            </div>
+                            Drag here to upload it!
+                        </div>
+                        <div :style="{display: (setup_file_dlg.upload.show ? 'block' : 'none')}">
+                            <el-progress :stroke-width="26" :text-inside="true" :percentage="setup_file_dlg.upload.progress"></el-progress>
+                            <div>
+                                Uploading: {{setup_file_dlg.upload.title}}
+                            </div>
+                        </div>
+                    </el-tab-pane>
+                    <!-- <el-tab-pane label="From File ID" name="FromFileID">
+                        <el-input ref="from_file_input_file_id" v-model="setup_file_dlg.from_file_id" placeholder="Please input a file ID."></el-input>
+                        <div style="float: right; margin-top: 10px">
+                            <el-button type="primary" ref="from_file_id_confirm_btn" @click="confirm_from_file_id">Confirm</el-button>
+                        </div>
+                    </el-tab-pane> -->
+                    <el-tab-pane label="From URL" name="FromURL">
+                        <el-form>
+                            <el-form-item label="URL">
+                                <el-input ref="from_url_input_url" v-model="setup_file_dlg.from_file_url" placeholder="Please input a file URL."></el-input>
+                            </el-form-item>
+                            <el-form-item label="Name">
+                                <el-input v-model="setup_file_dlg.file_name"></el-input>
+                              </el-form-item>
+                            <el-form-item label="Folder">
+                              <el-input v-model="setup_file_dlg.folder"></el-input>
+                            </el-form-item>
+                            <el-form-item label="Description">
+                              <el-input v-model="setup_file_dlg.description"></el-input>
+                            </el-form-item>
+                        </el-form>
+                        <div style="float: right; margin-top: 10px">
+                            <el-button type="primary" ref="from_url_confirm_btn" @click="confirm_from_url">Confirm</el-button>
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="From SSH" name="FromSSH">
+                        <el-form>
+                            <el-form-item label="Remote Path">
+                                <el-input ref="from_ssh_input_path" v-model="setup_file_dlg.from_ssh_path" placeholder="For example: /path/to/file"></el-input>
+                            </el-form-item>
+                            <el-form-item label="Server Host">
+                                <el-input v-model="setup_file_dlg.from_ssh_ip" placeholder="For example: user@10.10.10.1"></el-input>
+                            </el-form-item>
+                            <el-form-item label="Password">
+                                <el-input v-model="setup_file_dlg.from_ssh_password" placeholder="For example: password"></el-input>
+                            </el-form-item>
+                            <el-form-item label="Name">
+                                <el-input v-model="setup_file_dlg.file_name"></el-input>
+                              </el-form-item>
+                            <el-form-item label="Folder">
+                              <el-input v-model="setup_file_dlg.folder"></el-input>
+                            </el-form-item>
+                            <el-form-item label="Description">
+                              <el-input v-model="setup_file_dlg.description"></el-input>
+                            </el-form-item>
+                        </el-form>
+                        <div style="float: right;">
+                            <el-button type="primary" ref="from_ssh_confirm_btn" @click="confirm_from_ssh">Confirm</el-button>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
+            </el-dialog>
+        </div>
+        <script type="module" src="/static/index.js"></script>
+    </body>
+</html>

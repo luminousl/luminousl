@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模型结构</title>
+<style>
+    #svgContainer {
+        position: relative;
+        padding: 100px;
+    }
+    #selectionRect {
+        position: absolute;
+        border: 1px dashed blue;
+        background-color: rgba(0, 0, 255, 0.1);
+        pointer-events: none;
+    }
+    /* 模态框样式 */
+    .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    white-space: pre; /* 设置文本保留空格和换行 */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    }
+
+    /* 模态框内容样式 */
+    .modal-content {
+    display: flex;
+    background-color: #fefefe;
+    margin: 10vw;
+    margin-top: 15vh;
+    /* padding: 1vw; */
+    border: 1px solid #888;
+    width: 80vw;
+    font-size: 1.5vw;
+    border-radius: 1vw;
+    text-align: center;
+    font-weight: bold;
+    align-items: center;
+    }
+
+    .modal-content-left {
+        display: flex;
+        /* width: 50vw; */
+        /* height: auto; */
+        padding-left: 30vw;
+        text-align: left;
+        align-items: left;
+    }
+
+    /* 关闭按钮样式 */
+    .close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 2.8vw;
+    font-weight: bold;
+    padding-left: 10vw;
+    }
+
+    .close:hover,
+    .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+    }
+</style>
+</head>
+<body>
+<div id="myModal" class="modal">
+    <!-- 模态框内容 -->
+    <div class="modal-content">
+        <div class="modal-content-left">
+        
+        <p id="modalText"></p>
+        </div>
+        <span class="close">&times;</span>
+    </div>
+
+</div>
+<div id="svgContainer">
+
+
+    
+
+
+<div id="selectionRect"></div>
+</div>
+<script>
+    const selectionRect = document.getElementById('selectionRect');
+    let startX, startY, isDrawing = false;
+
+    var modal = document.getElementById("myModal");
+    var span = document.getElementsByClassName("close")[0];
+    var modalText = document.getElementById("modalText");
+
+    document.addEventListener('mousedown', (event) => {
+        startX = event.clientX;
+        startY = event.clientY;
+        isDrawing = true;
+        scrollX0 = window.scrollX || window.pageXOffset;
+        scrollY0 = window.scrollY || window.pageYOffset;
+    });
+
+    document.addEventListener('mousemove', (event) => {
+        if (!isDrawing) return;
+        
+        const scrollX = window.scrollX || window.pageXOffset; // 获取页面水平滚动距离
+        const scrollY = window.scrollY || window.pageYOffset; // 获取页面垂直滚动距离
+        const width = event.clientX - startX + scrollX - scrollX0;
+        const height = event.clientY - startY  + scrollY - scrollY0;
+        selectionRect.style.width = Math.abs(width) + 'px';
+        selectionRect.style.height = Math.abs(height) + 'px';
+        selectionRect.style.left = (width > 0 ? startX : event.clientX) + scrollX0 + 'px'; // 减去滚动距离
+        selectionRect.style.top = (height > 0 ? startY : event.clientY) + scrollY0  + 'px'; // 减去滚动距离
+    });
+
+    document.addEventListener('mouseup', (event) => {
+        isDrawing = false;
+        if (parseInt(selectionRect.style.width)>0){
+        const selectedTexts = [];
+        // const scrollX = window.scrollX || window.pageXOffset; // 获取页面水平滚动距离
+        // const scrollY = window.scrollY || window.pageYOffset; // 获取页面垂直滚动距离
+        console.log("width height", selectionRect.style.width,  selectionRect.style.height);
+        console.log("left top", parseInt(selectionRect.style.left), startY,  parseInt(selectionRect.style.top));
+        const selectionBox = {
+            left: parseInt(selectionRect.style.left) - scrollX,
+            top: parseInt(selectionRect.style.top)  - scrollY,
+            right: parseInt(selectionRect.style.left) + parseInt(selectionRect.style.width) - scrollX,
+            bottom: parseInt(selectionRect.style.top) + parseInt(selectionRect.style.height) - scrollY,
+        };
+        // console.log("selectionBox", selectionBox.top,  parseInt(selectionRect.style.top));
+        let sum=0;
+        let node_num=0;
+        let Convolution=0;
+        let Reformat = 0;
+        let PointWise = 0;
+        let Deconvolution=0;
+        // let Shuffle = 0;
+        // let Pooling = 0;
+
+        document.querySelectorAll('text').forEach(text => {
+            const textRect = text.getBoundingClientRect();
+            if (
+                textRect.left >= selectionBox.left &&
+                textRect.right <= selectionBox.right &&
+                textRect.top  >= selectionBox.top &&
+                textRect.bottom  <= selectionBox.bottom
+            ) {
+                const textContent = text.textContent.trim(); // 去除文本内容两端的空白字符
+                if (textContent.endsWith("ms")) { // 判断文本内容是否以 "ms" 结尾
+                    selectedTexts.push(textContent);
+                    const numStr = textContent.replace("ms", "").trim(); // 去除 "ms" 后缀并去除两端的空白字符
+                    const num = parseFloat(numStr); // 将提取的数字部分转换为浮点数
+                    if (!isNaN(num)) { // 确保转换成功，避免出现 NaN
+                        sum += num; // 将浮点数加到总和中
+                        node_num += 1;
+                    }
+                }
+                else if (textContent == "Convolution"){Convolution += 1;}
+                else if (textContent == "Reformat"){Reformat += 1;}
+                else if (textContent == "PointWise"){PointWise += 1;}
+                else if (textContent == "Deconvolution"){Deconvolution += 1;}
+                
+                // selectedTexts.push(text.textContent);
+            }
+        });
+        // alert("选中的文字: " + selectedTexts.join("+ ") + "\n选中网络延迟: " + sum.toFixed(2) + " ms");
+        // 更新模态框内容
+        // modalText.textContent = "选中节点数量: \n    " + selectedTexts.join("\n    ") + "\n\n选中部分延迟: \n" + "    "+ sum.toFixed(4) + " ms";
+        modalText.textContent = "选中节点总数: \t" + node_num ;
+        modalText.textContent += "\n选中延迟合计: \t" + sum.toFixed(3) + " ms";
+        modalText.textContent += "\n\n主要算子数量统计";
+        if (Reformat>0){modalText.textContent += "\nReformat数量:\t" + Reformat;}
+        if (PointWise>0){modalText.textContent += "\nPointWise数量:\t" + PointWise;}
+        if (Convolution>0){modalText.textContent += "\nConvolution数量:\t" + Convolution;}
+        modalText.textContent += "\n其他算子数量:\t" + (node_num-Convolution-PointWise-Reformat);
+        // if (Deconvolution>0){modalText.textContent += "\nDeconvolution数量:\t" + Deconvolution;}
+
+        // 显示模态框
+        if (node_num > 0){modal.style.display = "block";}
+        };
+        selectionRect.style.width = '0px';
+        selectionRect.style.height = '0px';
+    });
+    // 当点击关闭按钮时，关闭模态框
+    span.onclick = function() {
+    modal.style.display = "none";
+    }
+
+    // 当点击模态框外部时，关闭模态框
+    window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+    }
+</script>
+</body>
+</html>

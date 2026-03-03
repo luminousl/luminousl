@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MATool-模型分析工具-详细报告</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <style>
+        .body{
+            display: grid;
+            place-items: center;
+        }
+
+        .grid-item {
+            width: auto;
+            height: 160vh;
+            background-color: #f0f0f0;
+            border-radius: 0.25vw;
+        }
+
+        .image-link{
+            text-decoration: none;
+/*            width:32vw;*/
+        }
+
+        #gridContainer{
+            margin-top:0.25vw;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(auto-fill, 1fr);
+            gap: 1vw;
+/*            padding: 0.5v;*/
+            /*overflow-y: auto;
+            overflow*/-x: auto;
+            background-color: #f0f0f0;
+        }
+
+        
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="h1_title">模型分析详细文字报告</h1>
+        <!-- <h1>模型分析工具 —— detailed description <span style="font-size: 18px;">(点击栏目查看详细内容)</span></h1> -->
+    </header>
+
+    <div class="button-container">
+        <div class="function-buttons">
+            <!-- <iframe src=" " frameborder="0" style="width: 2px;"></iframe> -->
+        </div>
+
+        <div class="function-buttons">
+            <a href="../MATool.html" class="button-link">
+                <button id="toggleLayout6" class="LayoutButton">
+                    报告摘要
+                </button>
+            </a>
+            <a href="MATool_report.html" class="button-link">
+                <button id="toggleLayout6" class="LayoutButton">
+                    详细报告
+                </button>
+            </a>
+            <a href="MATool_visualization.html" class="button-link">
+                <button id="toggleLayout6" class="LayoutButton">
+                    图表分析
+                </button>
+            </a>
+            <a href="../reports/report4.html" class="button-link" target="_blank">
+                <button id="toggleLayout5"  class="LayoutButton">
+                    算子信息
+                </button>
+            </a>
+        </div>
+
+        <div class="layerout-buttons">
+            <button id="toggleLayout2" class="LayoutButton">切换为两列</button>
+            <button id="toggleLayout3" class="LayoutButton">切换为三列</button>
+            <button id="toggleLayout4" class="LayoutButton">切换为四列</button>
+            <!-- <a href="https://netron.app/" target="_blank">
+                <button id="toggleLayout5" class="LayoutButton">Netron工具</button>
+            </a> -->
+            <!-- <a href="MATool_visualization.html" target="_blank">
+                <button id="toggleLayout6" class="LayoutButton">模型可视化工具</button>
+            </a> -->
+        </div>
+    </div>
+
+    <div class="grid-container" id="gridContainer">
+        <!-- 此处将动态生成HTML文件列表 -->
+    </div>
+
+    <script>
+        const gridContainer = document.getElementById('gridContainer');
+        const toggleButton2 = document.getElementById('toggleLayout2');
+        const toggleButton3 = document.getElementById('toggleLayout3');
+        const toggleButton4 = document.getElementById('toggleLayout4');
+
+        
+        // 定义HTML文件列表
+        const htmlFiles = [
+            { name: 'report0.html', title: '模型分析摘要' },
+            { name: 'report1.html', title: '模型静态属性分析' },
+            { name: 'report2.html', title: '模型及算子推理指标分析' },
+            { name: 'report3.html', title: '硬件设备信息报告' },
+            { name: 'report4.html', title: '算子详细信息' },
+            { name: 'report5.json', title: '算子推理原始log' },
+            { name: 'report6.json', title: '模型结构graph' },
+            { name: 'report7.json', title: '模型profile原始log' },
+
+            // { name: 'description_C.html', title: '报告三：算子筛选指标描述一' },
+            // { name: 'description_D.html', title: '报告四：算子筛选指标描述二' },
+            // { name: 'README.pdf#toolbar=0&navpanes=0', title: '报告五：算子筛选指标描述三' },
+        ];
+
+        // 动态生成HTML文件列表
+        function generateHTMLFileList() {
+            // 清空网格容器
+            gridContainer.innerHTML = '';
+
+            // 为每个HTML文件创建一个网格项
+            htmlFiles.forEach(file => {
+                const iframe = document.createElement('iframe');
+                iframe.src = '../reports/' + file.name;
+                iframe.width = '100%';
+                iframe.height = '95%';
+                iframe.className = 'iframe-item'
+                iframe.style.whiteSpace = 'nowrap;'
+                // iframe.style.border = 'none;'
+
+                const gridItem = document.createElement('div');
+                gridItem.className = 'grid-item';
+                gridItem.appendChild(iframe);
+
+                const anchor = document.createElement('a');
+                anchor.href = '../reports/' + file.name;
+                anchor.target = '_blank';
+                anchor.className = 'image-link'
+
+
+                const titleElement = document.createElement('p');
+                titleElement.textContent = `${file.title}`;  //添加标题内容
+                titleElement.classList.add('image-title'); // 添加类名
+                anchor.appendChild(titleElement);
+
+
+                anchor.appendChild(gridItem);
+
+                gridContainer.appendChild(anchor);
+            });
+        }
+
+        // 页面加载后，生成HTML文件列表
+        window.addEventListener('load', generateHTMLFileList);
+
+        toggleButton2.addEventListener('click', () => {
+            gridContainer.style.gridTemplateColumns = 'repeat(2, 1fr)'; // 切换为2列布局
+            // 切换单元格高度
+            const gridItems = document.querySelectorAll('.grid-item');
+            gridItems.forEach((item) => {
+                item.style.height = '60vh'; // 切换单元格高度为60vh
+            });
+        });
+
+        toggleButton3.addEventListener('click', () => {
+            gridContainer.style.gridTemplateColumns = 'repeat(3, 1fr)'; // 切换为3列布局
+            // 切换单元格高度
+            const gridItems = document.querySelectorAll('.grid-item');
+            gridItems.forEach((item) => {
+                item.style.height = '160vh'; // 切换单元格高度为60vh
+            });
+        });
+
+        toggleButton4.addEventListener('click', () => {
+            gridContainer.style.gridTemplateColumns = 'repeat(4, 1fr)'; // 切换为4列布局
+            // 切换单元格高度
+            const gridItems = document.querySelectorAll('.grid-item');
+            gridItems.forEach((item) => {
+                item.style.height = '30vh'; // 切换单元格高度为60vh
+            });
+        });
+    </script>
+</body>
+</html>

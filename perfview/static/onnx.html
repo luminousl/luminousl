@@ -1,0 +1,1013 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        <link rel="stylesheet" href="/static/element-ui.css">
+        <link rel="stylesheet" href="/static/icons/style.css">
+        <link rel="icon" href="/static/favicon.jpg" sizes="32x32" />
+        <style type="text/css">
+            @scope (.onnx-light-theme) {
+                :scope{background-color: #fff}
+                #select-nodes-info{background-color: #fffc}
+                #help-plane{background-color: #fffc}
+                .navigation-btns-container{background-color: #fffa}
+                .navigation-btn{color: #888}
+                .navigation-btn:hover{color: #000;}
+            }
+
+            @scope (.onnx-dark-theme) {
+                :scope{background-color: #828282}
+                #select-nodes-info{color: #fff; background-color: #353535cc}
+                #help-plane{color: #fff; background-color: #353535cc}
+                .el-loading-mask{background-color: #828282}
+                .navigation-btns-container{background-color: #000a}
+                .navigation-btn{color: #c8c8c8}
+                .navigation-btn:hover{color: #fff}
+            }
+            
+            body{margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "PingFang SC"; text-rendering: geometricPrecision; font-size: 13px;}
+            #select-nodes-info{position: fixed; display: none; left: 10px; top: 10px; padding: 10px; pointer-events: none}
+            #help-plane{position: fixed; left: 10px; bottom: 50px; padding: 10px; pointer-events: none}
+            .navigation-btns{position: fixed; left: 0; top: 0px; right: 0; user-select: none; pointer-events: none; width: 100%; text-align: center;}
+            .navigation-btns-container{padding: 10px; display: inline-block; user-select: none;}
+            .navigation-btn{font-size: 35px; cursor: pointer; width: unset; height: unset; display: inline-block; pointer-events: auto}
+            .navigation-btn:hover{font-weight: bold;}
+
+            .subgraph-profiling-files-download{position: absolute; right: 0; top: 0; font-size: 32px; cursor: pointer; color: #000}
+            .subgraph-profiling-files-download:hover{font-weight: bold;}
+            .subgraph-profiling-script-dlg .el-dialog__body{padding: 5px;}
+            .subgraph-profiling-script-dlg .el-dialog__footer{padding: 0 5px 5px;}
+            .subgraph-profiling-script-dlg .el-dialog__header{padding: 5px 5px 0;}
+            .subgraph-profiling-script-dlg .el-dialog__headerbtn{top: 10px; right: 10px}
+            .subgraph-profiling-script-dlg textarea{height: calc(100% - 95px); white-space: nowrap;}
+
+            .subgraph-attached-files-dlg .el-dialog__body{padding: 5px;}
+            .subgraph-attached-files-dlg .el-dialog__header{padding: 5px 5px 0;}
+            .subgraph-attached-files-dlg .el-dialog__headerbtn{top: 10px; right: 10px}
+
+            .el-tabs__header{user-select: none; margin: 0 0 5px}
+            .profiling-content-svgview{text-align: center;}
+            .profiling-content-view{width: 100%; height: calc(100% - 48px); overflow: scroll; padding: 0 5px}
+            .profiling-content-view pre{color: #000}
+            .subgraph-function-buttons{padding: 10px; border: 1px solid #000}
+            .subgraph-function-buttons .el-checkbox{margin-right: 3px;}
+            .subgraph-function-buttons .el-button{margin-left: 0px;}
+            .subgraph-code-tabs{padding: 5px 10px; border: 1px solid #000; user-select: none}
+            .subgraph-code-tabs .el-tag{margin-right: 5px; cursor: pointer;}
+            .subgraph-profiling-tabs{padding: 0 10px}
+            /* .subgraph-profiling-tabs .el-tag{margin-right: 5px; cursor: pointer;} */
+
+            .text-error{color: #f00; font-weight: bold;}
+            .text-editor{word-break: keep-all; word-wrap: normal; white-space: nowrap;}
+            .text-editor textarea{white-space: nowrap; border: 1px solid #000; height: 100%; font-size: 16px; line-height: 18px;}
+            .code-line.code-line-focused{background-color: rgb(232, 248, 232)}
+            .code-line.code-line-error{background-color: #faa}
+            /* .subgraph-preview-dlg>.el-dialog{width: 80%} */
+            .subgraph-preview-dlg .el-dialog__header{padding: 8px 10px 0px; display: none;}
+            .subgraph-preview-dlg .el-dialog__headerbtn{top: 10px; right: 10px}
+            .subgraph-preview-dlg .el-dialog__body{padding: 0}
+
+            .download-link-primary{font-weight: bold; color: #000;}
+            .download-link-default{color: #000;}
+            
+            .subgraph-view{overflow: scroll; text-align: center; font-size: 15px; height: calc(100% - 56px); padding: 5px; user-select: none;}
+
+            #arrow{stroke: #000; fill: #000;}
+            #hover-arrow{stroke: #f00; fill: #f00;}
+            #screen{font-size: 15px}
+            #graph-container{text-align: center; user-select: none; padding-top: 100px; padding-bottom: 100px}
+            .g-node.io-tensor-node > .g-node-background{fill: #dbdcdb; stroke-width: 1; stroke: #000}
+            .g-node.io-tensor-node > .g-node-title{fill: #000;}
+            .g-node.operator-node > .g-node-background{fill: #000; stroke-width: 1; stroke: #000}
+            .g-node.operator-node > .g-node-title{fill: #fff;}
+            .g-node-link {stroke:#000; stroke-width:0.1em; fill: none;}
+            .g-node-link-copyed {stroke:#0000; stroke-width:0.25em; fill: none;}
+            .g-node-link-copyed:hover{stroke: #f00; pointer-events: stroke; cursor: pointer; marker-end: url("#hover-arrow")}
+            .g-node-link-shape {font-size: 12px; pointer-events: none;}
+            .g-node-link-selected{stroke: #f00; stroke-width: 0.1em; marker-end: url("#hover-arrow")}
+            .g-node-link-highlight{stroke: #f00; stroke-width: 0.25em; marker-end: url("#hover-arrow")}
+            .g-node{cursor: pointer}
+            .filter-by-keywords-dlg .el-radio{margin-right: 15px; font-size: 13px !important; line-height: 28px}
+            .filter-by-keywords-dlg .el-radio__label{padding-left: 5px}
+            .filter-by-keywords-dlg .el-form-item__content{line-height: 32px;}
+            .filter-by-keywords-dlg .el-checkbox{margin-right: 15px; vertical-align: middle;}
+            .filter-by-keywords-dlg .el-checkbox__label{padding-left: 5px; font-size: 13px}
+            .plane-title{font-size: 16px; font-weight: bold;}
+            .shortcut-tips{display: flex; position: fixed; left: 30px; top: 20px; pointer-events: none; display: inline-block;}
+            .shortcut-tips p{margin: 2px 0}
+            .el-collapse{background-color: #eee;}
+            .el-collapse-item__header{background-color: #eee; font-weight: bold;}
+            .el-collapse-item__wrap{background-color: #eee; border-bottom: 1px solid #ccc;}
+            .el-form-item__label{line-height: 30px;}
+            .el-form-item{margin-bottom: 10px;}
+            .el-collapse-item__content{padding-bottom: 5px;}
+            .select-list-plane{max-height: calc(100% - 50px); height: 250px; left: 0; top: 0; width: 400px;}
+            .select-list-plane .el-card__body{height: calc(100% - 45px); overflow: auto;}
+            .view-plane{position:fixed; z-index:101; background-color:#eee; display: none; resize: both;}
+            .view-plane > .el-card__header{padding: 5px 10px; line-height: 28px;  user-select: none; cursor: move; border-bottom: 1px solid #ccc; height: 40px}
+            .view-plane > .el-card__header .el-button{margin-left: 0}
+            .view-plane > .el-card__body{padding: 0px 10px}
+            .view-plane .el-form-item__label{font-size: 13px}
+            .view-plane .el-input__icon{width: 19px}
+            .search-view-plane{left: 0; top: 0; width: 400px;}
+            .issuelist-view-plane{left: 0; top: 0; width: 400px; height: 300px; max-height: 100%;}
+            .issuelist-view-content{padding: 0}
+            .issuelist-view-plane > .el-card__body{padding: 0}
+            .issuelist-view-content > .el-table{height: calc(100% - 40px)}
+            .issuelist-view-content .el-table th.el-table__cell>.cell{line-height: 12px; font-size: 12px;}
+            .issuelist-view-content > .el-table td.el-table__cell {font-size:small}
+            .issuelist-view-content > .el-table--mini .el-table__cell{padding: 2px 0}
+            .issuelist-view-content > .el-table__body-wrapper tr{cursor: pointer}
+            .issuelist-view-content .el-table__body-wrapper{overflow: auto; height: 100%;}
+            .issuelist-view-content .el-table .cell{line-height: 17px; white-space: nowrap; text-overflow: ellipsis;}
+            .issuelist-view-content .el-table thead{font-size: 12px}
+            .viewinfo-view-plane{left: calc(50% - 650px); top: calc(50% - 320px); width: 1300px; overflow-y:auto !important; max-height: 100%;}
+            .viewinfo-view-content{padding: 5px 0}
+            .viewinfo-view-content .el-descriptions-item__container{font-size: 12px;}
+            .viewinfo-view-content  .el-descriptions__body{background-color: unset;}
+            .viewinfo-view-content  .el-descriptions-item{vertical-align: middle; line-height: unset; padding-bottom: 0 !important}
+            .viewinfo-view-content  .viewinfo-files-button{margin-bottom: 5px}
+            .viewinfo-view-content  .el-descriptions-item__label{font-weight: bold;}
+            .viewinfo-view-content .el-table th.el-table__cell>.cell{line-height: 12px; font-size: 12px;}
+            .viewinfo-view-content .el-table td.el-table__cell {font-size:small}
+            .viewinfo-view-content .el-table--mini .el-table__cell{padding: 2px 0}
+            .viewinfo-view-content .el-table__body-wrapper tr{cursor: pointer}
+            .viewinfo-view-content .el-table .cell{line-height: 17px; white-space: nowrap; text-overflow: ellipsis;}
+            .viewinfo-view-content .el-table thead{font-size: 12px}
+            .operation-plane{left: calc(100% - 402px - 10px); top: 5px; width: 400px; height: 600px;}
+            .operation-plane .el-form-item{margin-bottom: 1px !important;}
+            .operation-plane .el-card__body{height: calc(100% - 40px); overflow-y: auto; }
+            .tensor-info-plane{left: calc(100% - 402px - 10px); top: 5px; width: 400px; height: 600px;}
+            .tensor-info-plane .el-card__body{height: calc(100% - 40px); overflow-y: auto; }
+            .view-plane .el-input--small .el-input__inner{height: 25px; line-height: 25px;}
+            .view-plane .el-collapse-item__header{height: 23px; line-height: 23px;}
+            .view-plane .el-form-item__label{height: 25px; line-height: 25px;}
+            .view-plane .el-input--small .el-input__icon{height: 25px; line-height: 25px;}
+            .view-plane .el-form-item__label{color: #000}
+            .view-plane .el-input__inner{color: #000}
+            .profile-view-plane{left: calc(100% - 402px - 10px); top: 10px; width: 400px; height: 550px}
+            .profile-view-content > .el-table td.el-table__cell {font-size:small}
+            .profile-view-content > .el-table--mini .el-table__cell{padding: 2px 0}
+            .profile-view-content > .el-table__body-wrapper tr{cursor: pointer}
+            .profile-view-content > .el-table {height: 100%}
+            .profile-view-content {padding: 0; height: calc(100% - 40px)}
+            .profile-view-content .el-table .cell{line-height: 17px; white-space: nowrap; text-overflow: ellipsis;}
+            .profile-view-content .el-table thead{font-size: 12px}
+            .profile-view-plane .el-button{margin-left: 0;}
+            .profile-view-plane > .el-card__body{padding: 0px}
+            .profile-view-plane .el-table__body-wrapper{height: calc(100% - 40px); overflow: auto;}
+            .compare-view-content > .el-table{height: 100%}
+            .compare-view-plane{left: calc(50% - min(865px, 50%)); top: calc(100% - 310px); max-width: 100%; padding: 0; height: 300px}
+            .compare-view-plane > .el-card__body{padding: 0}
+            .compare-view-content > .el-table td.el-table__cell {font-size:small}
+            .compare-view-content > .el-table--mini .el-table__cell{padding: 2px 0}
+            .compare-view-content .el-table__body-wrapper tr{cursor: pointer}
+            .compare-view-content .el-table .cell{line-height: 17px; white-space: nowrap; text-overflow: ellipsis;}
+            .compare-view-content .el-table thead{font-size: 12px}
+            .compare-view-content {height: calc(100% - 40px);}
+            .compare-view-plane .el-button{margin-left: 0;}
+            .compare-view-plane .el-table__body-wrapper{overflow: auto; height: calc(100% - 45px)}
+            .perlayer-compare-view-plane{left: calc(50% - min(865px, 50%)); top: calc(100% - 310px); max-width: 100%; padding: 0; height: 300px}
+            .perlayer-compare-view-plane > .el-card__body{padding: 0}
+            .perlayer-compare-view-content > .el-table{height: 100%}
+            .perlayer-compare-view-content > .el-table td.el-table__cell {font-size:small}
+            .perlayer-compare-view-content > .el-table--mini .el-table__cell{padding: 2px 0}
+            .perlayer-compare-view-content .el-table__body-wrapper tr{cursor: pointer}
+            .perlayer-compare-view-content .el-table .cell{line-height: 17px; white-space: nowrap; text-overflow: ellipsis;}
+            .perlayer-compare-view-content .el-table thead{font-size: 12px}
+            .perlayer-compare-view-content {height: calc(100% - 40px);}
+            .perlayer-compare-view-plane .el-button{margin-left: 0;}
+            .perlayer-compare-view-plane .el-table__body-wrapper{overflow: auto; height: calc(100% - 45px)}
+
+            .coder-view-plane{left: calc(50% - 350px); top: calc(100% - 400px); width: 700px; max-width: 100%; padding: 0; height: 400px}
+            .coder-view-plane > .el-card__body{padding: 0}
+            .coder-view-content > .el-table{height: 100%}
+            .coder-view-content > .el-table td.el-table__cell {font-size:small}
+            .coder-view-content > .el-table--mini .el-table__cell{padding: 2px 0}
+            .coder-view-content .el-table__body-wrapper tr{cursor: pointer}
+            .coder-view-content .el-table .cell{line-height: 17px; white-space: nowrap; text-overflow: ellipsis;}
+            .coder-view-content .el-table thead{font-size: 12px}
+            .coder-view-content {height: calc(100% - 40px);}
+            .coder-view-plane .el-button{margin-left: 0;}
+            .coder-view-plane .el-table__body-wrapper{overflow: auto; height: calc(100% - 45px)}
+            .coder-console {margin: 0; padding: 10px; white-space: break-spaces;}
+
+            .perlayer-compare-view-column-metrics{background-color: #edfbff !important;}
+            .perlayer-compare-view-column-metrics{background-color: #edfbff !important;}
+            th.perlayer-compare-view-column-metrics{background-color: unset !important;}
+            .perlayer-compare-view-column-major{background-color: #edffed !important;}
+            th.perlayer-compare-view-column-major{background-color: unset !important;}
+            .perlayer-compare-view-column-compared{background-color: #feebeb !important;}
+            th.perlayer-compare-view-column-compared{background-color: unset !important;}
+            .model-info-plane{right: 0; top: 0; width: 400px; overflow-y:auto !important; max-height: 100%;}
+            .model-info-plane .el-input--small .el-input__inner{height: 25px; line-height: 25px;}
+            .model-info-plane .el-collapse-item__header{height: 23px; line-height: 23px;}
+            .model-info-plane .el-form-item__label{height: 25px; line-height: 25px;}
+            .model-info-plane .el-input--small .el-input__icon{height: 25px; line-height: 25px;}
+            .model-info-plane .el-form-item__label{color: #000}
+            .model-info-plane .el-input__inner{color: #000}
+            .model-info-plane .el-form-item{margin-bottom: 1px !important;}
+
+            /* .health-check-plane{left: calc(100% - 410px); top: 0; width: 400px; max-height: 100%;}
+            .health-check-plane .el-input--small .el-input__inner{height: 25px; line-height: 25px;}
+            .health-check-plane .el-collapse-item__header{height: 23px; line-height: 23px;}
+            .health-check-plane .el-form-item__label{height: 25px; line-height: 25px;}
+            .health-check-plane .el-input--small .el-input__icon{height: 25px; line-height: 25px;}
+            .health-check-plane .el-form-item__label{color: #000}
+            .health-check-plane .el-input__inner{color: #000}
+            .health-check-plane .el-form-item{margin-bottom: 1px !important;}
+
+            .health-check-content > .el-table td.el-table__cell {font-size:small}
+            .health-check-content > .el-table--mini .el-table__cell{padding: 2px 0}
+            .health-check-content > .el-table__body-wrapper tr{cursor: pointer}
+            .health-check-content > .el-table {height: 100%}
+            .health-check-content {padding: 0; height: calc(100% - 40px)}
+            .health-check-content .el-table .cell{line-height: 17px; white-space: nowrap; text-overflow: ellipsis;}
+            .health-check-content .el-table thead{font-size: 12px} */
+
+            .health-check-plane{left: calc(50% - 600px); top: 10%; width: 1200px; height: 550px}
+            .health-check-plane .el-button{margin-left: 0;}
+            .health-check-plane > .el-card__body{padding: 0px}
+            .health-check-plane .el-table__body-wrapper{height: calc(100% - 40px); overflow: auto;}
+            .health-check-content > .el-table td.el-table__cell {font-size:small}
+            .health-check-content > .el-table--mini .el-table__cell{padding: 2px 0}
+            .health-check-content > .el-table__body-wrapper tr{cursor: pointer}
+            .health-check-content > .el-table {height: 100%}
+            .health-check-content {padding: 0; height: calc(100% - 40px)}
+            .health-check-content .el-table .cell{line-height: 17px; white-space: nowrap; text-overflow: ellipsis;}
+            .health-check-content .el-table thead{font-size: 12px}
+
+            .close-button{float: right; padding: 0; font-size: 18px;}
+            .close-button > .el-input__icon{cursor: pointer; line-height: 26px;}
+            .close-button:hover{font-weight: bold; font-size: 20px}
+            .g-node-focused > .g-node-background{stroke-width: 5 !important; stroke: #f00 !important}
+            .g-node-focused-highlight > .g-node-background{stroke-width: 5 !important; stroke: #00ff85 !important}
+            .g-node-focused-compared > .g-node-background{stroke-width: 5 !important; stroke: rgb(255, 0, 251) !important}
+            .g-node-focused-compared-highlight > .g-node-background{stroke-width: 5 !important; stroke: #0085ff !important}
+            .el-card.is-always-shadow{box-shadow: 0 5px 15px 0 rgba(0,0,0,.3)}
+            .search-dlg-content{padding: 5px 0px}
+            .search-dlg-content > .el-table__empty-block {background-color: #eee;}
+            .search-dlg-content > .el-table td.el-table__cell {font-size:small; padding: 2px 0;}
+            .search-dlg-content > .el-table tr{cursor: pointer}
+            .search-dlg-content > .el-table th.el-table__cell>.cell{padding: 0; font-size: 12px; line-height: 15px; white-space: nowrap; text-overflow: ellipsis;}
+            .search-dlg-content > .el-table--small .el-table__cell{padding: 0 10px;}
+            #bird-eye-view{position:fixed; z-index:100; background-color: #fffc; box-shadow: 0 5px 15px 0 rgba(0,0,0,.3); width: 330px; height: 250px; right: 1em; bottom: 1em;}
+            #bev-canvas{width: 100%; height: 100%}
+            .model-io-view{cursor: pointer;}
+            .select-list-item{margin-left: 0 !important; margin-bottom: 5px}
+            .select-list-content{padding: 5px 0; overflow-x: hidden;}
+            .keeped-nodes-area{padding-top: 5px; padding-bottom: 10px; border: 1px dashed #05f; text-align: center; color: #999; user-select: none;}
+            .keeped-nodes-clear{float: right; margin-right: 5px; cursor: pointer;}
+            .keeped-nodes-clear:hover{font-weight: bold;}
+            /* .el-form-item{margin-bottom: 1px !important;} */
+            .el-collapse-item__header{height: auto; line-height: 30px;}
+            .el-collapse-item__content{padding-bottom: 5px;}
+            .el-button > span{pointer-events: none;}
+            .el-card{transition: none;}
+            tr.current-row > .el-table__cell{background-color: #5e5 !important;}
+            .el-collapse-item__header{color: #000}
+            .node-expend-title{font-weight: bold; user-select: none;}
+            .expend-node-plane{line-height: 20px; padding: 5px; background-color: #fff; word-wrap: break-word}
+            #select-nodes-bbox{position: fixed;left: 0; top: 0; border: 2px solid #f00; background-color: #0002; z-index: 999; user-select: none; pointer-events: none;}
+            .selected-nodes-summary-title{font-weight: bold;font-size: 15px;}
+            .selected-nodes-summary-subtitle{font-weight:600}
+            .el-table td.el-table__cell div{white-space: nowrap;}
+            .el-dialog__body{padding: 10px;}
+            .input-with-double-suffix > input{padding-right: 45px !important}
+            .el-input--suffix .el-input__inner{padding-right: 25px;}
+            .compare-view-column-metrics{background-color: #edfbff !important;}
+            .compare-view-column-metrics{background-color: #edfbff !important;}
+            th.compare-view-column-metrics{background-color: unset !important;}
+            .compare-view-column-major{background-color: #edffed !important;}
+            th.compare-view-column-major{background-color: unset !important;}
+            .compare-view-column-compared{background-color: #feebeb !important;}
+            th.compare-view-column-compared{background-color: unset !important;}
+            .el-table td.el-table__cell{border-bottom: 1px solid #000000;}
+            .el-table td.el-table__cell{border-right: 1px solid #000000;}
+            .function-buttons{position:fixed; left: 10px; bottom: 10px; font-size: 30px; user-select: none;}
+            .highlight-precision-tips{position:fixed; left: 10px; bottom: 50px; font-size: 15px; user-select: none;}
+            .function-button:hover{cursor:pointer}
+            .node-info-plane-selected-profile{ background-color: rgb(88, 255, 135); font-weight: bold;}
+            .g-node-precision-strongly-fp16 > .g-node-background{fill: #0000ff !important;}
+            .g-node-precision-strongly-int8 > .g-node-background{fill: #00ff00 !important;}
+            .g-node-precision-strongly-fp32 > .g-node-background{fill: #ff0000 !important;}
+            .highlight-precision-tips-item-block-fp16{width: 10px; height: 10px; background-color: #0000ff;margin-left: 10px;}
+            .highlight-precision-tips-item-block-int8{width: 10px; height: 10px; background-color: #00ff00;margin-left: 10px;}
+            .highlight-precision-tips-item-block-fp32{width: 10px; height: 10px; background-color: #ff0000;margin-left: 10px;}
+            .highlight-precision-tips-item{display: flex; align-items: center; justify-content: center; flex-direction: row;}
+        </style>
+        <script type="text/javascript" src="/static/vue.js"></script>
+        <script type="text/javascript" src="/static/element-ui.js"></script>
+        <meta name="onnx-json-url" content=""/>
+    </head>
+    <body class="">
+        <script type="text/javascript">
+            const storage_theme = localStorage.getItem("global_theme");
+            if(storage_theme == "dark"){
+                document.body.classList.add("onnx-dark-theme");
+            }else{
+                document.body.classList.add("onnx-light-theme");
+            }
+        </script>
+        <div id="addition-ui">
+            <input style="display: none;" type="file" id="file-broswer" accept="*" ref="file_broswer"/>
+            <div id="graph-container">
+                <svg id="screen" width="1000" height="2000" xmlns="http://www.w3.org/2000/svg" version="1.1">
+                    <defs>
+                        <marker
+                        id="arrow"
+                        viewBox="0 0 10 10"
+                        refX="5"
+                        refY="5"
+                        markerWidth="6"
+                        markerHeight="6"
+                        orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" />
+                        </marker>
+                    </defs>
+                    <defs>
+                        <marker
+                        id="hover-arrow"
+                        viewBox="0 0 10 10"
+                        refX="5"
+                        refY="5"
+                        markerWidth="6"
+                        markerHeight="6"
+                        orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" />
+                        </marker>
+                    </defs>
+                </svg>
+                <div id="select-nodes-bbox"></div>
+                <div id="select-nodes-info">
+                    <div v-if="selected_nodes_summary.show">
+                        <div v-if="selected_nodes_summary.selected.show" style="text-align: left;">
+                            <span class="selected-nodes-summary-title">Selected {{selected_nodes_summary.selected.total_nodes}} nodes</span><br/>
+                            <span class="selected-nodes-summary-subtitle">{{selected_nodes_summary.selected.major_latency_title}}: </span><span>{{Math.round(selected_nodes_summary.selected.major_latency * 10000) / 10000}} ms</span><br/>
+                            <span class="selected-nodes-summary-subtitle">{{selected_nodes_summary.selected.compared_latency_title}}: </span><span>{{Math.round(selected_nodes_summary.selected.compared_latency * 10000) / 10000}} ms</span><br/>
+                            <span class="selected-nodes-summary-subtitle">Diff: </span><span>{{Math.round((selected_nodes_summary.selected.major_latency - selected_nodes_summary.selected.compared_latency) * 10000) / 10000}} ms</span>
+                        </div>
+                        <div v-if="selected_nodes_summary.realtime.show" style="text-align: left;">
+                            <br/>
+                            <span class="selected-nodes-summary-title">Selecting {{selected_nodes_summary.realtime.total_nodes}} nodes</span><br/>
+                            <span class="selected-nodes-summary-subtitle">{{selected_nodes_summary.realtime.major_latency_title}}: </span><span>{{Math.round(selected_nodes_summary.realtime.major_latency * 10000) / 10000}} ms</span><br/>
+                            <span class="selected-nodes-summary-subtitle">{{selected_nodes_summary.realtime.compared_latency_title}}: </span><span>{{Math.round(selected_nodes_summary.realtime.compared_latency * 10000) / 10000}} ms</span><br/>
+                            <span class="selected-nodes-summary-subtitle">Diff: </span><span>{{Math.round((selected_nodes_summary.realtime.major_latency - selected_nodes_summary.realtime.compared_latency) * 10000) / 10000}} ms</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <el-card ref="node_info_plane" class="view-plane operation-plane" :style="{display: (node_info_dlg.show ? 'block' : 'none')}">
+                <div slot="header" class="clearfix">
+                  <span class="plane-title">Node Info ({{node_info_dlg.current_node_id}})</span>
+                  <span class="close-button"><i @click="node_info_dlg.show=false" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div>
+                <el-collapse v-model="node_info_dlg.active_collapse">
+                    <el-collapse-item  title="Properties" name="1">
+                        <el-form label-width="100px">
+                            <el-form-item label="Type:"><el-input size="small" readonly v-model="node_info_dlg.current_node.raw.optype"></el-input></el-form-item>
+                            <el-form-item label="Name:"><el-input size="small" readonly v-model="node_info_dlg.current_node.raw.name">
+                                <i slot="suffix" @click="scroll_to_nodes(node_info_dlg.current_node.raw.idd)" class="el-input__icon el-icon-view model-io-view"></i>
+                            </el-input></el-form-item>
+                            <el-form-item v-if="node_info_dlg.current_node.raw.domain != ''" label="Module:"><el-input size="small" readonly v-model="node_info_dlg.current_node.raw.domain"></el-input></el-form-item>
+                        </el-form>
+                    </el-collapse-item>
+                    <el-collapse-item title="Attributes" name="2" v-if="node_info_dlg.current_node.raw.attrs.length > 0">
+                        <el-form label-width="100px">
+                            <el-form-item :key="index" v-for="(attr, index) in node_info_dlg.current_node.raw.attrs" :label="attr.name + ':'"><el-input size="small" readonly v-model="attr.value_show"></el-input></el-form-item>
+                        </el-form>
+                    </el-collapse-item>
+                    <el-collapse-item title="Inputs" name="3" v-if="node_info_dlg.current_inputs_value.length > 0">
+                        <el-form label-width="100px">
+                            <el-form-item :key="index" v-for="(input, index) in node_info_dlg.current_inputs_value" :label="input.label">
+                                <el-input size="small" :class="{'input-with-double-suffix': input.category == 'variable'}" readonly v-model="input.title">
+                                    <i v-if="input.category == 'variable' && input.reference_nodes.length > 0" slot="suffix" @click="scroll_to_nodes(...input.reference_nodes)" class="el-input__icon el-icon-view model-io-view"></i>
+                                    <i slot="suffix" @click="expend_node_tensor(input)" class="el-input__icon model-io-view" :class="{'el-icon-minus': input.expend, 'el-icon-plus': !input.expend}"></i>
+                                </el-input>
+                                <div v-if="input.expend" class="expend-node-plane">
+                                    <div v-if="input.reference_nodes.length > 0">
+                                        <el-button style="margin-left: 2px" size="mini" round v-for="(n, i) in input.reference_nodes" :key="i+'.input.reference_nodes'" @click="scroll_to_nodes(n)">{{input.reference_nodes_optype[i]}}</el-button>
+                                    </div>
+                                    <span class="node-expend-title">name: </span><span>{{input.name}}</span><br/>
+                                    <span class="node-expend-title">category: </span><span>{{input.category}}</span><br/>
+                                    <span class="node-expend-title">tensor: </span><span>{{input.dtype}} [{{input.shape.join(", ")}}]</span><br/>
+                                    <div v-if="input.category == 'initializer'"><span class="node-expend-title">data: </span><br/><span>[{{input.data_view.join(", ")}}{{input.data_view.length < input.total_element ? ', ...' : ''}}]</span></div>
+                                </div>
+                            </el-form-item>
+                        </el-form>
+                    </el-collapse-item>
+                    <el-collapse-item title="Outputs" name="4" v-if="node_info_dlg.current_outputs_value.length > 0">
+                        <el-form label-width="100px">
+                            <el-form-item :key="index" v-for="(output, index) in node_info_dlg.current_outputs_value" :label="output.label">
+                                <el-input size="small" :class="{'input-with-double-suffix': output.category == 'variable'}" readonly v-model="output.title">
+                                    <i v-if="output.category == 'variable' && output.reference_nodes.length > 0" slot="suffix" @click="scroll_to_nodes(...output.reference_nodes)" class="el-input__icon el-icon-view model-io-view"></i>
+                                    <i slot="suffix" @click="expend_node_tensor(output)" class="el-input__icon model-io-view" :class="{'el-icon-minus': output.expend, 'el-icon-plus': !output.expend}"></i>
+                                </el-input>
+                                <div v-if="output.expend" class="expend-node-plane">
+                                    <div v-if="output.reference_nodes.length > 0">
+                                        <el-button style="margin-left: 2px" size="mini" round v-for="(n, i) in output.reference_nodes" :key="i+'.output.reference_nodes'" @click="scroll_to_nodes(n)">{{output.reference_nodes_optype[i]}}</el-button>
+                                    </div>
+                                    <span class="node-expend-title">name: </span><span>{{output.name}}</span><br/>
+                                    <span class="node-expend-title">category: </span><span>{{output.category}}</span><br/>
+                                    <span class="node-expend-title">tensor: </span><span>{{output.dtype}} [{{output.shape.join(", ")}}]</span><br/>
+                                    <div v-if="output.category == 'initializer'"><span class="node-expend-title">data: </span><br/><span>[{{output.data_view.join(", ")}}{{output.data_view.length < output.total_element ? ', ...' : ''}}]</span></div>
+                                </div>
+                            </el-form-item>
+                        </el-form>
+                    </el-collapse-item>
+                    <el-collapse-item title="Profile A" name="5" v-if="node_info_dlg.current_profile_list.length > 0">
+                        <el-form label-width="100px">
+                            <div :class="{'node-info-plane-selected-profile': node_info_dlg.current_node.current_focus_profile == index}" :key="index + 'node_info'" v-for="(profile, index) in node_info_dlg.current_profile_list">
+                                <el-form-item label="Name"><el-input size="small" readonly v-model="profile.Name"><i slot="suffix" @click="node_info_profile_locate_to(node_info_dlg.current_node, profile, 'major', index)" class="el-input__icon el-icon-view model-io-view"></i></el-input></el-form-item>
+                                <el-form-item label="TacticName"><el-input size="small" readonly v-model="profile.TacticName"></el-input></el-form-item>
+                                <el-form-item label="LayerType"><el-input size="small" readonly v-model="profile.LayerType"></el-input></el-form-item>
+                                <el-form-item label="Latency"><el-input size="small" readonly v-model="profile.Latency"></el-input></el-form-item>
+                                <el-form-item label="Details"><el-input size="small" readonly v-model="profile.details_title">
+                                    <i slot="suffix" @click="expend_profile_details(profile)" class="el-input__icon model-io-view" :class="{'el-icon-minus': profile.expend, 'el-icon-plus': !profile.expend}"></i>
+                                </el-input>
+                                <div v-if="profile.expend" class="expend-node-plane">
+                                    <pre style="margin: 0; font-weight: normal; font-size: 12px">{{profile.details_title}}</pre>
+                                </div>
+                                </el-form-item>
+                            </div>
+                        </el-form>
+                    </el-collapse-item>
+                    <el-collapse-item title="Profile B" name="6" v-if="node_info_dlg.current_profile_compared_list.length > 0">
+                        <el-form label-width="100px">
+                            <div :key="index + 'compared_node_info'" v-for="(profile, index) in node_info_dlg.current_profile_compared_list">
+                                <el-form-item label="Name"><el-input size="small" readonly v-model="profile.Name"><i slot="suffix" @click="node_info_profile_locate_to(node_info_dlg.current_node, profile, 'compared', index)" class="el-input__icon el-icon-view model-io-view"></i></el-input></el-form-item>
+                                <el-form-item label="TacticName"><el-input size="small" readonly v-model="profile.TacticName"></el-input></el-form-item>
+                                <el-form-item label="LayerType"><el-input size="small" readonly v-model="profile.LayerType"></el-input></el-form-item>
+                                <el-form-item label="Latency"><el-input size="small" readonly v-model="profile.Latency"></el-input></el-form-item>
+                                <el-form-item label="Details">
+                                    <el-input size="small" readonly v-model="profile.details_title">
+                                        <i slot="suffix" @click="expend_profile_details(profile)" class="el-input__icon model-io-view" :class="{'el-icon-minus': profile.expend, 'el-icon-plus': !profile.expend}"></i>
+                                    </el-input>
+                                    <div v-if="profile.expend" class="expend-node-plane">
+                                        <pre style="margin: 0; font-weight: normal; font-size: 12px">{{profile.details_title}}</pre>
+                                    </div>
+                                </el-form-item>
+                            </div>
+                        </el-form>
+                    </el-collapse-item>
+                </el-collapse>
+                <div v-if="node_info_dlg.current_node.type == 'input' || node_info_dlg.current_node.type == 'output'" style="padding: 15px 10px">
+                    <el-button type="default" size="mini" @click="show_model_info_dlg(true, false)">Show All Inputs/Outputs</el-button>
+                </div>
+            </el-card>
+
+            <el-card ref="tensor_info_plane" class="view-plane tensor-info-plane" :style="{display: (tensor_info_dlg.show ? 'block' : 'none')}">
+                <div slot="header" class="clearfix">
+                  <span class="plane-title">Tensor Info ({{tensor_info_dlg.current_tensor_id}})</span>
+                  <span class="close-button"><i @click="tensor_info_dlg.show=false" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div>
+                <el-collapse v-model="tensor_info_dlg.active_collapse">
+                    <el-collapse-item  title="Properties" name="1">
+                        <el-form label-width="100px">
+                            <el-form-item label="Name:"><el-input size="small" readonly v-model="tensor_info_dlg.current_tensor.name">
+                                <i slot="suffix" @click="scroll_to_tensor(tensor_info_dlg.current_tensor)" class="el-input__icon el-icon-view model-io-view"></i>
+                            </el-input></el-form-item>
+                            <el-form-item label="Shape:"><el-input size="small" readonly v-model="tensor_info_dlg.current_tensor.name_show"></el-input></el-form-item>
+                        </el-form>
+                    </el-collapse-item>
+                    <el-collapse-item  title="Producer" name="1">
+                        <el-form label-width="100px">
+                            <el-form-item :key="index" v-for="(producer, index) in tensor_info_dlg.producers" :label="producer.node_optype">
+                                <el-input size="small" readonly v-model="producer.node_name">
+                                    <i slot="suffix" @click="scroll_to_nodes(producer.node_idd)" class="el-input__icon el-icon-view model-io-view"></i>
+                            </el-input></el-form-item>
+                        </el-form>
+                    </el-collapse-item>
+                    <el-collapse-item  title="Consumers" name="2">
+                        <el-form label-width="100px">
+                            <el-form-item :key="index" v-for="(consumer, index) in tensor_info_dlg.consumers" :label="consumer.node_optype">
+                                <el-input size="small" readonly v-model="consumer.node_name">
+                                    <i slot="suffix" @click="scroll_to_nodes(consumer.node_idd)" class="el-input__icon el-icon-view model-io-view"></i>
+                            </el-input></el-form-item>
+                        </el-form>
+                    </el-collapse-item>
+                </el-collapse>
+            </el-card>
+
+            <el-card ref="health_check_plane" class="view-plane health-check-plane" :style="{display: (health_check_dlg.show ? 'block' : 'none')}">
+                <div slot="header" class="clearfix">
+                  <span class="plane-title">Health Check</span>
+                  <span class="close-button"><i @click="health_check_dlg.show=false" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div>
+                <div class="health-check-content">
+                    <el-table :data="health_check_dlg.issues" size="mini" style="width: 100%" highlight-current-row border stripe @row-click="health_check_issue_click" v-loading="health_check_dlg.loading">
+                        <el-table-column prop="type" label="Type" width="230" sortable></el-table-column>
+                        <el-table-column prop="severity" label="Level" width="80"></el-table-column>
+                        <el-table-column prop="message" label="Message"></el-table-column>
+                    </el-table>
+                </div>
+            </el-card>
+
+            <el-card ref="model_info_plane" class="view-plane model-info-plane" :style="{display: (model_info_dlg.show ? 'block' : 'none')}">
+                <div slot="header" class="clearfix">
+                  <span class="plane-title">Model Info</span>
+                  <span class="close-button"><i @click="model_info_dlg.show=false" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div>
+                <el-collapse v-model="model_info_dlg.active_collapse">
+                    <el-collapse-item :title="'Inputs (' + model_info_dlg.input.length + ')'" name="1">
+                        <el-form label-width="120px">
+                            <el-form-item :key="index" v-for="(input, index) in model_info_dlg.input" :label="input.name">
+                                <el-input size="small" readonly v-model="input.info"><i slot="suffix" @click="scroll_to_nodes(input.node_id)" class="el-input__icon el-icon-view model-io-view"></i></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </el-collapse-item>
+                    <el-collapse-item :title="'Outputs (' + model_info_dlg.output.length + ')'" name="2">
+                        <el-form label-width="120px">
+                            <el-form-item :key="index" v-for="(output, index) in model_info_dlg.output" :label="output.name">
+                                <el-input size="small" readonly v-model="output.info"><i slot="suffix" @click="scroll_to_nodes(output.node_id)" class="el-input__icon el-icon-view model-io-view"></i></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </el-collapse-item>
+                </el-collapse>
+            </el-card>
+
+            <el-card ref="search_plane" class="view-plane search-view-plane" :style="{display: (search_plane.show ? 'block' : 'none')}">
+                <div ref="search_plane_header" slot="header" class="clearfix">
+                  <span class="plane-title">Search</span>
+                  <span class="close-button"><i @click="search_plane.show=false" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div> 
+                <div class="search-dlg-content">
+                    <el-input placeholder="Please input" ref="search_plane_filter" v-model="search_plane.filter" @keydown.enter.native="do_search_by_filter"></el-input>
+                    <el-table v-if="search_plane.data.length > 0" stripe
+                        highlight-current-row @row-click="search_result_click"
+                        :data="search_plane.data" size="small" height="500px"
+                        style="width: 100%" border stripe>
+                        <el-table-column
+                            prop="idd"
+                            label="ID" width="80" sortable>
+                        </el-table-column>
+                        <el-table-column
+                            prop="optype"
+                            label="Type" width="120" sortable>
+                        </el-table-column>
+                        <el-table-column
+                            prop="name"
+                            label="Name" sortable>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </el-card>
+
+            <el-card ref="select_list_plane" class="view-plane select-list-plane" :style="{display: (select_list_dlg.show ? 'block' : 'none')}">
+                <div ref="select_list_plane_header" slot="header" class="clearfix">
+                  <span class="plane-title">Select List</span>
+                  <span class="close-button"><i @click="select_list_dlg.show=false" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div>
+                <div class="select-list-content">
+                    <el-button v-if="select_list_dlg.current_select_nodes.length > 0" @click="select_list_copy_names" type="success" class="select-list-item" size="mini" round>Copy Names</el-button>
+                    <p style="border: 0.5px solid #ddd; margin-top: 5px; margin-bottom: 10px"></p>
+                    <el-button @dragstart.native="select_list_drag_start($event, item)" draggable="true" class="select-list-item" @click="select_list_item_click(item, true)" :key="index + '_selected'" size="mini" v-for="(item, index) in select_list_dlg.current_select_nodes" round>{{item.name}}</el-button>
+                    <p style="border: 0.5px solid #ddd; margin-top: 5px; margin-bottom: 10px"></p>
+                    <div class="keeped-nodes-area" @drop="keepd_nodes_ondrop" @dragover="keepd_nodes_dragover">
+                        <i v-if="select_list_dlg.keeped_nodes.length > 0" @click="keeped_nodes_clean" class="keeped-nodes-clear el-icon-scissors"></i>
+                        <div v-if="select_list_dlg.keeped_nodes.length == 0">
+                            <div style="padding: 5px 30px; font-size: 50px;">
+                            <i class="el-icon-plus"></i></div>
+                            Drag here to keep it!
+                        </div>
+                        <el-button class="select-list-item" @click="select_list_item_click(item, true)" :key="index + '_keeped'" size="mini" v-for="(item, index) in select_list_dlg.keeped_nodes" round>{{item.name}}</el-button>
+                    </div>
+                </div>
+            </el-card>
+            <div id="bird-eye-view" :style="{display: (bird_eye_view.show ? 'block' : 'none')}">
+                <canvas id="bev-canvas" width="660" height="500"></canvas>
+            </div>
+            <!-- <el-card ref="coder_view_plane" class="view-plane coder-view-plane" :style="{display: (coder_view_plane.show ? 'block' : 'none')}">
+                <div ref="coder_view_plane_header" slot="header" class="clearfix">
+                  <div style="display: inline-block;">
+                    <span class="plane-title">Coder View (Ctrl + Enter to run)</span>
+                  </div>
+                  <span class="close-button"><i @click="coder_view_plane_to_bottom" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div>
+                <div class="coder-view-content">
+                    <div style="overflow: auto; height: calc(100% - 155px)">
+                        <pre class="coder-console">{{coder_view_plane.console_log}}</pre>
+                    </div>
+                    <el-input @keydown.enter.native="coder_run_code"
+                     @keydown.9.native.prevent="coder_text_area_tab_keydown"
+                     ref="coder_codeblocks" type="textarea" :rows="7" v-model="coder_view_plane.code" class="coder-editor" placeholder="Enter the code to run.">
+                    </el-input>
+                </div>
+            </el-card> -->
+            <el-card ref="profile_view_plane" class="view-plane profile-view-plane" :style="{display: (profile_view_plane.show ? 'block' : 'none')}">
+                <div ref="profile_view_plane_header" slot="header" class="clearfix">
+                  <div style="display: inline-block;">
+                    <span class="plane-title">Layer Perf</span>
+                    <el-button plain type="primary" size="mini" @click="copy_profile_view_table_data" style="margin-left: 10px" class="avoid-pointer-event">Copy</el-button>
+                    <!-- <el-button plain type="primary" size="mini" @click="profile_view_maxlatency_click" class="avoid-pointer-event">Sort By Latency</el-button> -->
+                  </div>
+                  <span class="close-button"><i @click="profile_view_plane_to_bottom" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div>
+                <div class="profile-view-content">
+                    <el-table :data="profile_view_plane.profiles" ref="profile_view_table" style="width: 100%" size="mini" border highlight-current-row stripe  @row-click="profile_table_row_change">
+                        <el-table-column prop="idd" label="ID" width="50" sortable></el-table-column>
+                        <el-table-column prop="tactic_name" label="Tactic" width="180" sortable></el-table-column>
+                        <el-table-column prop="latency" label="Latency" width="90" sortable></el-table-column>
+                        <el-table-column prop="percentage" label="Time %" width="90" sortable></el-table-column>
+                        <el-table-column prop="onnx_layers_string" label="ONNX Layers" width="500" sortable></el-table-column>
+                        <el-table-column prop="name" label="Name" width="180" sortable></el-table-column>
+                        <el-table-column prop="layer_type" label="Type" width="90" sortable></el-table-column>
+                        <el-table-column v-for="(trtperf_column, index) in profile_view_plane.trtperf_columns" :prop="trtperf_column.prop_name" :label="trtperf_column.show_name" :width="trtperf_column.width" sortable></el-table-column>
+                    </el-table>
+                </div>
+            </el-card>
+            <el-dialog class="filter-by-keywords-dlg" title="Enter Keywords for Filter" :visible.sync="filter_by_keywords_dlg.show">
+                <el-form label-width="100px">
+                    <el-form-item label="Keywords:"><el-input @keydown.enter.prevent @keydown.enter.native="filter_by_keywords_dlg_confirm" ref="filter_by_keywords_dlg_keywords" size="small" v-model="filter_by_keywords_dlg.keywords" placeholder="Please enter keywords"></el-input></el-form-item>
+                    <el-form-item label="Filter By:">
+                        <el-checkbox-group v-model="filter_by_keywords_dlg.filter_by_what">
+                            <el-checkbox label="TRT Name"></el-checkbox>
+                            <el-checkbox label="OP Type"></el-checkbox>
+                            <el-checkbox label="OP Name"></el-checkbox>
+                            <el-checkbox label="Tactic Name"></el-checkbox>
+                        </el-checkbox-group>
+                    </el-form-item>
+                    <el-form-item label="Filter Mode:">
+                        <el-radio-group v-model="filter_by_keywords_dlg.filter_mode">
+                            <el-radio label="Include"></el-radio>
+                            <el-radio label="Exclude"></el-radio>
+                            <el-radio label="Starts With"></el-radio>
+                            <el-radio label="Ends With"></el-radio>
+                            <el-radio label="Equal To"></el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                </el-form>
+                <span slot="footer" class="dialog-footer">
+                    <el-button type="primary" @click="filter_by_keywords_dlg_clean">Clean</el-button>
+                    <el-button @click="filter_by_keywords_dlg.show = false">Cancel</el-button>
+                    <el-button type="success" @click="filter_by_keywords_dlg_confirm">Confirm</el-button>
+                </span>
+            </el-dialog>
+            <el-card ref="compare_view_plane" class="view-plane compare-view-plane" :style="{display: (compare_view_plane.show ? 'block' : 'none')}">
+                <div ref="compare_view_plane_header" slot="header" class="clearfix">
+                  <div style="display: inline-block;">
+                    <span class="plane-title">Compare View</span>
+                    <span>Sort By:</span>
+                    <el-button plain type="primary" size="mini" @click="compare_view_defaultview_click" class="avoid-pointer-event">Sequence</el-button>
+                    <el-button plain type="primary" size="mini" @click="compare_view_maxlatency_click" class="avoid-pointer-event">ProfileA Latency</el-button>
+                    <el-button plain type="primary" size="mini" @click="compare_view_maxissue_click" class="avoid-pointer-event">Worse Diff</el-button>
+                    <el-button plain type="primary" size="mini" @click="compare_view_max_percentage_click" class="avoid-pointer-event">Worse Diff %</el-button>
+                    <el-button plain type="primary" size="mini" @click="compare_view_filter_by_keywords_click" class="avoid-pointer-event">Filter By Keywords</el-button>
+                    <el-button plain type="primary" size="mini" @click="compare_view_copy_content" class="avoid-pointer-event">Copy</el-button>
+                    <el-tooltip class="avoid-pointer-event" :content="compare_view_plane.total_latency_policy_remove_empty_group ? 'Total worse diff latency: Remove group when Profile B is empty.' : 'Total worse diff latency: Keep all groups.'" placement="top">
+                        <el-switch
+                            v-model="compare_view_plane.total_latency_policy_remove_empty_group"
+                            active-color="#13ce66"
+                            inactive-color="#ff4949"
+                            :active-value="true"
+                            @change="compare_view_total_latency_policy_remove_empty_group_change"
+                            :inactive-value="false">
+                        </el-switch>
+                    </el-tooltip>
+                    <div style="display: inline-block; font-size: 12px;"><span>Total Worse Diff Latency: <span style="font-weight: bold;"> {{Math.round(compare_view_plane.total_diff_latency * 100) / 100}} </span> ms</span></div>
+                  </div>
+                  <span class="close-button"><i @click="compare_view_plane_to_bottom" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div> 
+                <div class="compare-view-content">
+                    <el-table :data="compare_view_plane.profiles" ref="compare_view_table" size="mini" border highlight-current-row stripe @current-change="compare_table_current_change"  @row-click="compare_table_row_click_change" :span-method="compare_table_rows_span_method">
+                        <el-table-column :label="'Profile A ( total ' + Math.round(compare_view_plane.total_profile_latency * 100) / 100 + 'ms )' ">
+                        <el-table-column :index="0" prop="name" label="TRT Name" width="80" class-name="compare-view-column-major"></el-table-column>
+                        <!-- <el-table-column :index="1" prop="layer_type" label="Type" width="90"></el-table-column> -->
+                        <el-table-column :index="1" prop="onnx_layers_string" label="OP Type" width="300" class-name="compare-view-column-major"></el-table-column>
+                        <el-table-column :index="2" prop="tactic_name" label="Tactic Name" width="200" class-name="compare-view-column-major"></el-table-column>
+                        <el-table-column :index="3" prop="latency" label="Latency (ms)" width="90" class-name="compare-view-column-major"></el-table-column>
+                        <el-table-column :index="4" prop="latency_total" label="Total (ms)" width="90" class-name="compare-view-column-major"></el-table-column>
+                        </el-table-column>
+
+                        <el-table-column label="Metrics" align="center">
+                            <el-table-column :index="5" prop="diff_latency" label="Worse Diff" width="90" class-name="compare-view-column-metrics"></el-table-column>
+                            <el-table-column :index="6" prop="latency_percentage" label="Worse Diff %" width="100" class-name="compare-view-column-metrics"></el-table-column>
+                        </el-table-column>
+
+                        <el-table-column :label="'Profile B ( total ' + Math.round(compare_view_plane.total_compared_latency * 100) / 100 + 'ms )' ">
+                        <el-table-column :index="7" prop="compared_latency_total" label="Total (ms)" width="90" class-name="compare-view-column-compared"></el-table-column>
+                        <el-table-column :index="8" prop="compared_latency" label="Latency (ms)" width="90" class-name="compare-view-column-compared"></el-table-column>
+                        <!-- <el-table-column :index="9" prop="compared_name" label="Name" width="180"></el-table-column> -->
+                        <!-- <el-table-column :index="10" prop="compared_layer_type" label="Type" width="90"></el-table-column> -->
+                        <el-table-column :index="9" prop="compared_tactic_name" label="Tactic Name" width="200" class-name="compare-view-column-compared"></el-table-column>
+                        <el-table-column :index="10" prop="compared_onnx_layers_string" label="OP Type" width="300" class-name="compare-view-column-compared"></el-table-column>
+                        <el-table-column :index="11" prop="compared_name" label="TRT Name" width="80" class-name="compare-view-column-compared"></el-table-column>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </el-card>
+            <el-card ref="perlayer_compare_view_plane" class="view-plane perlayer-compare-view-plane" :style="{display: (perlayer_compare_view_plane.show ? 'block' : 'none')}">
+                <div ref="perlayer_compare_view_plane_header" slot="header" class="clearfix">
+                  <div style="display: inline-block;">
+                    <span class="plane-title">Per Layer Compare View</span>
+                    <!-- <span>Sort By:</span> -->
+                    <!-- <el-button plain type="primary" size="mini" @click="perlayer_compare_view_defaultview_click" class="avoid-pointer-event">Sequence</el-button>
+                    <el-button plain type="primary" size="mini" @click="perlayer_compare_view_maxlatency_click" class="avoid-pointer-event">ProfileA Latency</el-button>
+                    <el-button plain type="primary" size="mini" @click="perlayer_compare_view_maxissue_click" class="avoid-pointer-event">Worse Diff</el-button>
+                    <el-button plain type="primary" size="mini" @click="perlayer_compare_view_max_percentage_click" class="avoid-pointer-event">Worse Diff %</el-button> -->
+                    <el-button plain type="primary" size="mini" @click="perlayer_compare_view_filter_by_keywords_click" class="avoid-pointer-event">Filter By Keywords</el-button>
+                    <el-button plain type="primary" size="mini" @click="perlayer_compare_view_copy_content" class="avoid-pointer-event">Copy</el-button>
+                    <div style="display: inline-block; font-size: 12px;"><span>Total Worse Diff Latency: <span style="font-weight: bold;"> {{Math.round(perlayer_compare_view_plane.total_diff_latency * 100) / 100}} </span> ms</span></div>
+                  </div>
+                  <span class="close-button"><i @click="perlayer_compare_view_plane_to_bottom" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div> 
+                <div class="perlayer-compare-view-content">
+                    <el-table :data="perlayer_compare_view_plane.profiles" ref="perlayer_compare_view_table" size="mini" border highlight-current-row stripe @current-change="perlayer_compare_table_current_change"  @row-click="perlayer_compare_table_row_click_change" :span-method="perlayer_compare_table_rows_span_method">
+                        <el-table-column :index="0" prop="node_name" label="OP Name" width="200" class-name="compare-view-column-major"></el-table-column>
+                        <el-table-column :index="1" prop="node_optype" label="OP Type" width="120" class-name="compare-view-column-major"></el-table-column>
+                        <el-table-column :label="'Profile A ( total ' + Math.round(perlayer_compare_view_plane.total_profile_latency * 100) / 100 + 'ms )' ">
+                            <el-table-column :index="2" prop="name" label="TRT Name" width="80" class-name="compare-view-column-major" sortable></el-table-column>
+                            <!-- <el-table-column :index="1" prop="layer_type" label="Type" width="90"></el-table-column> -->
+                            <el-table-column :index="3" prop="onnx_layers_string" label="OP Type" width="300" class-name="perlayer-compare-view-column-major" sortable></el-table-column>
+                            <el-table-column :index="4" prop="tactic_name" label="Tactic Name" width="200" class-name="perlayer-compare-view-column-major" sortable></el-table-column>
+                            <el-table-column :index="5" prop="latency" label="Latency (ms)" width="90" class-name="perlayer-compare-view-column-major" sortable></el-table-column>
+                            <el-table-column :index="6" prop="latency_total" label="Total (ms)" width="90" class-name="perlayer-compare-view-column-major" sortable></el-table-column>
+                        </el-table-column>
+
+                        <el-table-column label="Metrics" align="center">
+                            <el-table-column :index="7" prop="diff_latency" label="Worse Diff" width="90" class-name="perlayer-compare-view-column-metrics" sortable></el-table-column>
+                            <el-table-column :index="8" prop="latency_percentage" label="Worse Diff %" width="100" class-name="perlayer-compare-view-column-metrics" sortable></el-table-column>
+                        </el-table-column>
+
+                        <el-table-column :label="'Profile B ( total ' + Math.round(perlayer_compare_view_plane.total_compared_latency * 100) / 100 + 'ms )' ">
+                            <el-table-column :index="9" prop="compared_latency_total" label="Total (ms)" width="90" class-name="perlayer-compare-view-column-compared" sortable></el-table-column>
+                            <el-table-column :index="10" prop="compared_latency" label="Latency (ms)" width="90" class-name="perlayer-compare-view-column-compared" sortable></el-table-column>
+                            <!-- <el-table-column :index="9" prop="compared_name" label="Name" width="180"></el-table-column> -->
+                            <!-- <el-table-column :index="10" prop="compared_layer_type" label="Type" width="90"></el-table-column> -->
+                            <el-table-column :index="11" prop="compared_tactic_name" label="Tactic Name" width="200" class-name="perlayer-compare-view-column-compared" sortable></el-table-column>
+                            <el-table-column :index="12" prop="compared_onnx_layers_string" label="OP Type" width="300" class-name="perlayer-compare-view-column-compared" sortable></el-table-column>
+                            <el-table-column :index="13" prop="compared_name" label="TRT Name" width="80" class-name="perlayer-compare-view-column-compared" sortable></el-table-column>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </el-card>
+            <el-dialog :title="new_issue_dlg.mode == 'new' ? 'New Comment' : (new_issue_dlg.mode == 'edit' ? 'Edit Comment' : 'Review Comment')" :visible.sync="new_issue_dlg.show">
+                <el-form label-width="100px">
+                    <el-form-item label="Keywords:"><el-input @keydown.enter.prevent :readonly="new_issue_dlg.mode == 'readonly'" ref="new_issue_dlg_keywords" size="small" v-model="new_issue_dlg.keywords" placeholder="Please enter keywords, multi-keywords separated by ;"></el-input></el-form-item>
+                    <el-form-item label="Description:"><el-input :readonly="new_issue_dlg.mode == 'readonly'" type="textarea" :rows="8" size="small" v-model="new_issue_dlg.description"></el-input></el-form-item>
+                    <el-form-item v-if="new_issue_dlg.associate_nodes.length > 0" label="Nodes:">
+                        <div class="new-issue-dlg-associate-nodes">
+                            <el-tag style="margin: 3px" v-for="(node, index) in new_issue_dlg.associate_nodes" :closable="new_issue_dlg.mode == 'edit' || new_issue_dlg.mode == 'new'" @close="new_issue_dlg_remove_associate_node(node)">
+                                {{node.raw.idd}}-{{node.raw.optype}}
+                            </el-tag>
+                        </div>
+                    </el-form-item>
+                </el-form>
+                <span slot="footer" class="dialog-footer" v-if="new_issue_dlg.mode == 'edit' || new_issue_dlg.mode == 'new'">
+                    <el-button @click="new_issue_dlg.show = false">Cancel</el-button>
+                    <el-button type="primary" @click="new_issue_dlg_confirm">Confirm</el-button>
+                </span>
+                <span slot="footer" class="dialog-footer" v-if="new_issue_dlg.mode == 'readonly'">
+                    <el-button @click="new_issue_dlg_copy_url_click">Copy URL</el-button>
+                </span>
+            </el-dialog>
+            <el-card ref="issuelist_view_plane" class="view-plane issuelist-view-plane" :style="{display: (issuelist_view_plane.show ? 'block' : 'none')}">
+                <div ref="issuelist_view_plane_header" slot="header" class="clearfix">
+                  <div style="display: inline-block;">
+                    <span class="plane-title">Comments</span>
+                    <el-button type="success" size="mini" @click="new_issue_click" class="avoid-pointer-event">New</el-button>
+                    <el-button type="success" size="mini" @click="issuelist_edit_click" class="avoid-pointer-event">Edit</el-button>
+                    <el-button type="success" size="mini" @click="issuelist_refresh_issuelist_click" class="avoid-pointer-event">Refresh</el-button>
+                    <el-button type="danger" size="mini" @click="issuelist_delete_click" class="avoid-pointer-event">Delete</el-button>
+                  </div>
+                  <span class="close-button"><i @click="issuelist_view_plane.show = false" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div> 
+                <div class="issuelist-view-content">
+                    <el-table ref="issuelist_view_table" v-loading="issuelist_view_plane.loading" :data="issuelist_view_plane.issues" style="width: 100%" size="mini" border highlight-current-row stripe @row-click="issuelist_issues_table_click" @row-dblclick="issuelist_issues_table_dbclick">
+                        <el-table-column prop="issue_id" label="ID" width="38"></el-table-column>
+                        <el-table-column prop="keywords" label="Keywords" width="150"></el-table-column>
+                        <el-table-column prop="num_associate_nodes" label="Nodes" width="60"></el-table-column>
+                        <el-table-column prop="description" label="Description" width="180"></el-table-column>
+                        <el-table-column prop="update_time" label="Date" width="180"></el-table-column>
+                    </el-table>
+                </div>
+            </el-card>
+            <el-card ref="viewinfo_view_plane" class="view-plane viewinfo-view-plane" :style="{display: (viewinfo_view_plane.show ? 'block' : 'none')}">
+                <div ref="viewinfo_view_plane_header" slot="header" class="clearfix">
+                  <div style="display: inline-block;">
+                    <span class="plane-title">Model Summary</span>
+                  </div>
+                  <span class="close-button"><i @click="viewinfo_view_plane.show = false" class="el-input__icon el-icon-error avoid-pointer-event"></i></span>
+                </div> 
+                <div class="viewinfo-view-content">
+                    <el-collapse v-model="viewinfo_view_plane.active_collapse">
+                        <el-collapse-item title="Basic Info" name="basic">
+                            <el-descriptions class="margin-top" :column="4">
+                                <el-descriptions-item label="Model Name" :span="2">{{viewinfo_view_plane.basic_info.model_name}}</el-descriptions-item>
+                                <el-descriptions-item label="File Size">{{Math.round(viewinfo_view_plane.basic_info.size_bytes / 1024 / 1024 * 100) / 100}} MB</el-descriptions-item>
+                                <el-descriptions-item label="File ID">{{viewinfo_view_plane.basic_info.file_id}}</el-descriptions-item>
+                                <el-descriptions-item label="Virtual Folder" :span="2">{{viewinfo_view_plane.basic_info.virtual_folder}}</el-descriptions-item>
+                                <el-descriptions-item label="Model IO" :span="2"><el-button @click="show_model_info_dlg(false, true)" size="mini">Show Model Inputs and Outputs</el-button></el-descriptions-item>
+                                <el-descriptions-item label="Description" :span="4">{{viewinfo_view_plane.basic_info.description}}</el-descriptions-item>
+                            </el-descriptions>
+                        </el-collapse-item>
+                        <el-collapse-item title="Tools" name="tools">
+                            <div style="padding: 10px 10px 5px">
+                                <el-button class="viewinfo-files-button" @click="viewinfo_copy_proposed_io_formats" size="mini">Copy Proposed IO Formats</el-button>
+                                <el-button class="viewinfo-files-button" @click="viewinfo_copy_proposed_force_to_fp16_io_formats" size="mini">Copy Proposed(force to fp16) IO Formats</el-button>
+                                <el-button class="viewinfo-files-button" @click="viewinfo_copy_input_output_definitions" size="mini">Copy IO Definitions</el-button>
+                                <div v-if="with_profile_data" style="display: inline-block; margin-left: 10px;">
+                                    <el-button class="viewinfo-files-button" @click="viewinfo_show_related_trex_view" size="mini">Show TREX View</el-button>
+                                </div>
+                                <div v-if="have_logfile" style="display: inline-block; margin-left: 10px;">
+                                    <el-button class="viewinfo-files-button" @click="viewinfo_copy_trtexec_commandline" size="mini">Copy trtexec cmd</el-button>
+                                </div>
+                            </div>
+                        </el-collapse-item>
+                        <el-collapse-item title="Files" name="files">
+                            <div style="padding: 10px 10px 5px; word-break: break-all;">
+                                <!-- <el-button class="viewinfo-files-button" @click="viewinfo_files_button_click(file)" v-for="(file, index) in viewinfo_view_plane.files" :key="index + 'viewinfo_file'" size="mini" :type="file.style">{{file.name}}</el-button> -->
+                                <a class="viewinfo-files-button" :href="'/download/' + file.file_id" target="_blank" style="margin-right: 10px;" v-for="(file, index) in viewinfo_view_plane.files" :key="index + 'viewinfo_file'" :class="'download-link-' + file.style">{{file.name}}</a>
+                            </div>
+                        </el-collapse-item>
+                        <el-collapse-item :title="'Layers Summary ( sum of all layers: ' + viewinfo_view_plane.latency_total + 'ms )'" name="layers_summary">
+                            <el-table :data="viewinfo_view_plane.layers_summary" style="width: 100%" height="200" size="mini" border highlight-current-row stripe>
+                                <el-table-column prop="layer_type" label="OP" width="250" sortable></el-table-column>
+                                <el-table-column prop="layer_count" label="Count" width="150" sortable></el-table-column>
+                                <el-table-column prop="total_latency" label="A Total Latency (ms)" width="150" sortable></el-table-column>
+                                <el-table-column prop="compared_total_latency" label="B Total Latency (ms)" width="150" sortable></el-table-column>
+                                <el-table-column prop="total_latency_percent" label="A Latency percent (%)" width="150" sortable></el-table-column>
+                                <el-table-column prop="compared_total_latency_percent" label="B Latency percent (%)" width="150" sortable></el-table-column>
+                                <el-table-column prop="total_kernels" label="A Total Kernels" width="120" sortable></el-table-column>
+                                <el-table-column prop="compared_total_kernels" label="B Total Kernels" width="120" sortable></el-table-column>
+                            </el-table>
+                        </el-collapse-item>
+                        <el-collapse-item v-if="viewinfo_view_plane.performance_summary != null || viewinfo_view_plane.performance_summary_compared != null" title="Performance Summary" name="performance_summary">
+                            <div style="padding: 10px 10px 5px">
+                                <div v-if="viewinfo_view_plane.performance_summary != null">
+                                    <span>Profile A</span>
+                                    <el-input type="textarea" rows="8" v-model="viewinfo_view_plane.performance_summary" style="font-size: 12px;"></el-input>
+                                </div>
+                                <div v-if="viewinfo_view_plane.performance_summary_compared != null">
+                                    <span>Profile B</span>
+                                    <el-input type="textarea" rows="8" v-model="viewinfo_view_plane.performance_summary_compared" style="font-size: 12px;"></el-input>
+                                </div>
+                            </div>
+                        </el-collapse-item>
+                        <el-collapse-item title="Keyboard Shortcuts" name="helps">
+                            <el-descriptions class="margin-top" :column="2">
+                                <el-descriptions-item label="Ctrl/Cmd + Click">Select multiple nodes.</el-descriptions-item>
+                                <el-descriptions-item label="Ctrl/Cmd + Drag">Select nodes in the rectangular area.</el-descriptions-item>
+                                <el-descriptions-item label="C">Clean selected nodes.</el-descriptions-item>
+                                <el-descriptions-item label="Escape">Close the current dialog (fixed order).</el-descriptions-item>
+                                <el-descriptions-item label="F">Autocomplete closes (GF Algo) the subgraph wrapped by selected nodes.</el-descriptions-item>
+                                <el-descriptions-item label="G">Connecting to model inputs from selected nodes.</el-descriptions-item>
+                                <el-descriptions-item label="Y">Copy selected node names to clipboard.</el-descriptions-item>
+                                <el-descriptions-item label="S">Send selected subgraph to a remote SSH server. (Coming soon)</el-descriptions-item>
+                                <el-descriptions-item label="U">Copy selected subgraph as code to clipboard. (Coming soon)</el-descriptions-item>
+                            </el-descriptions>
+                        </el-collapse-item>
+                      </el-collapse>
+                </div>
+            </el-card>
+            <el-dialog title="New profile" :visible.sync="subgraph_preview_dlg.input_name_dialog_show" width="30%" center>
+                <el-input ref="subgraph_preview_dlg_input_name" @keydown.enter.native="subgraph_preview_dlg_input_name_confirm" v-model="subgraph_preview_dlg.input_name" placeholder="Input a name"></el-input>
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="subgraph_preview_dlg.input_name_dialog_show = false">Cancel</el-button>
+                    <el-button type="primary" @click="subgraph_preview_dlg_input_name_confirm">Confirm</el-button>
+                </span>
+            </el-dialog>
+            <el-dialog title="Profiling Script" class="subgraph-profiling-script-dlg" :visible.sync="subgraph_preview_dlg.profiling_script.show" :fullscreen="true">
+                <div style="text-align: left; padding: 10px 0">
+                    <el-button size="small" @click="subgraph_preview_dlg.profiling_script.show = false">Cancel</el-button>
+                    <el-button size="small" type="success" @click="subgraph_preview_dlg_input_profiling_script_confirm">Run</el-button>
+                </div>
+                <el-input type="textarea" v-model="subgraph_preview_dlg.profiling_script.code" rows="15" ref="subgraph_preview_dlg_input_profiling_script" placeholder="Input a name"></el-input>
+            </el-dialog>
+            <el-dialog title="Attached Files" class="subgraph-attached-files-dlg" width="50%" :visible.sync="subgraph_preview_dlg.attached_files.show">
+                <div style="display: flex; align-items: baseline">
+                    <el-button size="mini" style="margin: 0 10px 10px" @click="subgraph_preview_attached_file_upload">Upload</el-button>
+                    <el-progress style="width: 100%" v-if="subgraph_preview_dlg.attached_files.progress_show" :percentage="subgraph_preview_dlg.attached_files.progress"></el-progress>
+                </div>
+                <el-table :data="subgraph_preview_dlg.current_code_tab.attached_files" border size="mini" style="width: 100%; height: 350px">
+                    <el-table-column label="Operation" width="100">
+                        <template slot-scope="scope">
+                            <el-button size="mini" type="danger" @click="subgraph_preview_attached_file_remove(scope.row)">Remove</el-button>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="name" label="Name" width="250"></el-table-column>
+                    <el-table-column prop="size" label="Size" width="120"></el-table-column>
+                    <el-table-column prop="create_time" label="Date" width="350"></el-table-column>
+                </el-table>
+            </el-dialog>
+            <el-dialog class="subgraph-preview-dlg" title="Subgraph Preview" :visible.sync="subgraph_preview_dlg.show" :close-on-click-modal="false" :fullscreen="true" :close-on-press-escape="false">
+                <el-row>
+                    <el-col :span="8">
+                        <div class="subgraph-function-buttons">
+                            <el-button size="mini" type="danger" @click="subgraph_preview_dlg.show=false">Exit</el-button>
+                            <!-- <el-button size="mini" @click="subgraph_preview_current_download">Download</el-button> -->
+                            <el-button size="mini" type="primary" @click="subgraph_preview_current_save">New</el-button>
+                            <el-button size="mini" type="primary" @click="subgraph_preview_attached_file_list">Files</el-button>
+                            <el-button size="mini" type="success" @click="subgraph_preview_current_profiling">Profiling</el-button>
+                            <el-checkbox v-model="subgraph_preview_dlg.load_onnx" @change="subgraph_preview_compile_current_code(null)">Load ONNX</el-checkbox>
+                        </div>
+                        <!-- <el-input type="textarea" rows="20" @keydown.native="subgraph_preview_dlg_on_code_change" v-model="subgraph_preview_dlg.code" style="height: 90%"></el-input> -->
+                        <div class="subgraph-code-tabs">
+                            <el-tag v-for="tab in subgraph_preview_dlg.code_tabs" :key="tab.name" :closable="tab.name != 'current'" :type="tab.name == subgraph_preview_dlg.current_code_tab.name ? '' : 'info'" @click="subgraph_preview_dlg_code_tab_click(tab.name)" @close="subgraph_preview_dlg_code_tab_close(tab.name)">
+                            {{tab.name}}
+                            </el-tag>
+                        </div>
+                        <el-input type="textarea" class="text-editor" v-model="subgraph_preview_dlg.current_code_tab.code" ref="subgraph_preview_dlg_editor" style="height: calc(100% - 300px);" @input="subgraph_preview_dlg_on_code_change" @click.native="subgraph_preview_dlg_editor_on_click">
+                        </el-input>
+                        <!-- <div class="text-editor" contenteditable="plaintext-only" ref="subgraph_preview_dlg_editor" style="height: calc(100% - 274px); padding: 8px">
+                        </div> -->
+                        <div ref="subgraph_preview_dlg_running_output" style="height: 185px; font-size: 15px; padding: 8px; border: 1px solid #000; overflow: scroll;">
+                        </div>
+                    </el-col>
+                    <el-col :span="16">
+                        <el-tabs ref="subgraph_preview_dlg_profiling_tabs" class="subgraph-profiling-tabs" v-model="subgraph_preview_dlg.current_profiling_tab" @tab-click="subgraph_preview_dlg_profiling_tab_click">
+                            <el-tab-pane label="ONNX View" name="ONNX View" :closable="false">
+                                <div class="subgraph-view" ref="subgraph_preview_div">
+                                    <svg ref="subgraph_preview_dlg_container" class="subgraph-container">
+                                    </svg>
+                                    <i class="subgraph-profiling-files-download el-icon-download" @click="subgraph_preview_download_current_profiling_file"></i>
+                                </div>
+                            </el-tab-pane>
+                            <el-tab-pane v-for="tab in subgraph_preview_dlg.current_code_tab.profiling_list" :key="tab.name" :label="tab.name" :name="tab.name">
+                                <i class="subgraph-profiling-files-download el-icon-download" @click="subgraph_preview_download_current_profiling_file"></i>
+                                <div class="profiling-content-view" :name="tab.name">
+                                </div>
+                            </el-tab-pane>
+                        </el-tabs>
+                    </el-col>
+                  </el-row>
+            </el-dialog>
+            <div class="navigation-btns">
+                <div tabindex="-1" class="navigation-btns-container">
+                    <el-tooltip effect="dark" content="Model Summary" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon icon-information navigation-btn" @click="function_button_click('open-viewinfo-view')"></i>
+                    </el-tooltip>
+                    
+                    <el-tooltip v-if="with_kernel_match_report" effect="dark" content="Perf Comparison" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon icon-compare navigation-btn" @click="function_button_click('open-compare-view')"></i>
+                    </el-tooltip>
+                    
+                    <!-- <el-tooltip v-if="with_kernel_match_report" effect="dark" content="Per Layer Comparison" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon icon-per-kernel-compare navigation-btn" @click="function_button_click('open-perlayer-compare-view')"></i>
+                    </el-tooltip> -->
+
+                    <!-- <el-tooltip effect="dark" content="Coder" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon el-icon-edit-outline navigation-btn" @click="function_button_click('open-coder-view')"></i>
+                    </el-tooltip> -->
+
+                    <el-tooltip v-if="with_profile_data" effect="dark" content="Layer Perf" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon icon-performance navigation-btn" @click="function_button_click('open-profile-view')"></i>
+                    </el-tooltip>
+
+                    <el-tooltip effect="dark" content="Select List" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon icon-select-list navigation-btn" @click="function_button_click('open-select-list-view')"></i>
+                    </el-tooltip>
+                    
+                    <el-tooltip effect="dark" content="Model MiniMap" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon icon-overall navigation-btn" @click="function_button_click('open-bird-eye-view')"></i>
+                    </el-tooltip>
+
+                    <el-tooltip effect="dark" content="Health Check" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon el-icon-first-aid-kit navigation-btn" @click="function_button_click('open-health-check-view')"></i>
+                    </el-tooltip>
+
+                    <el-tooltip effect="dark" content="Search" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon icon-search navigation-btn" @click="function_button_click('open-search-view')"></i>
+                    </el-tooltip>
+
+                    <el-tooltip effect="dark" content="Fork" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon el-icon-share navigation-btn" @click="function_button_click('open-fork-view')"></i>
+                    </el-tooltip>
+
+                    <el-tooltip effect="dark" content="Comments" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon icon-issue-list navigation-btn" @click="function_button_click('open-issuelist-view')"></i>
+                    </el-tooltip>
+
+                    <el-tooltip effect="dark" content="Extract Subgraph from Selected Nodes" placement="bottom">
+                        <i :tabindex="-1" class="el-input__icon icon-extract-subgraph navigation-btn" @click="function_button_click('download-current-selected-nodes-as-a-model')"></i>
+                    </el-tooltip>
+                    <!-- <i class="el-input__icon el-icon-circle-plus navigation-btn" @click="function_button_click('zoom-out-view')"></i>
+                    <i class="el-input__icon el-icon-remove navigation-btn" @click="function_button_click('zoom-in-view')"></i> -->
+                </div>
+            </div>
+            <div v-if="highlight_precision == 'strongly'" class="highlight-precision-tips">
+                <div class="highlight-precision-tips-item">
+                    <div class="highlight-precision-tips-item-title">FP32</div>
+                    <div class="highlight-precision-tips-item-block-fp32"></div>
+                </div>
+                <div class="highlight-precision-tips-item">
+                    <div class="highlight-precision-tips-item-title">FP16</div>
+                    <div class="highlight-precision-tips-item-block-fp16"></div>
+                </div>
+                <div class="highlight-precision-tips-item">
+                    <div class="highlight-precision-tips-item-title">INT8</div>
+                    <div class="highlight-precision-tips-item-block-int8"></div>
+                </div>
+            </div>
+            <div class="function-buttons">
+                <el-tooltip effect="dark" :content="'Switch to ' + (global_theme == 'light' ? 'dark' : 'light') + ' theme'" placement="top">
+                    <i @click="switch_theme" class="function-button" :class="{'el-icon-star-on': global_theme == 'light', 'el-icon-star-off': global_theme == 'dark'}"></i>
+                </el-tooltip>
+                <el-tooltip effect="dark" :content="'Switch to ' + (highlight_precision == 'strongly' ? 'weakly' : 'strongly') + ' mode'" placement="top">
+                    <i @click="switch_highlight_precision" class="function-button" :class="{'el-icon-help': highlight_precision == 'strongly', 'el-icon-s-opportunity': highlight_precision == 'weakly'}"></i>
+                </el-tooltip>
+            </div>
+        </div>
+        <script type="module" src="/static/graph.js"></script>
+        <script type="module" src="/static/onnx.js"></script>
+    </body>
+</html>

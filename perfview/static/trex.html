@@ -1,0 +1,94 @@
+<html>
+    <head>
+        <meta name="view-svg-path" content=""/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        <link rel="stylesheet" href="/static/element-ui.css">
+        <link rel="icon" href="/static/favicon.jpg" sizes="32x32" />
+        <style type="text/css">
+            body{padding: 0; margin: 0}
+            #svg-container{width: 100%; height: 100%;}
+            .function-button{position: fixed; cursor: pointer; top: 10px; left: 10px; z-index: 1000; background-color: #409EFF; color: #fff; padding: 5px; border-radius: 5px;}
+            .function-button:hover{background-color: #13ce66; font-weight: bold;}
+        </style>
+        <title>PerfView Trex</title>
+    </head>
+    <body>
+        <div id="svg-container" style="text-align: center;">
+        </div>
+        <div class="function-button button-download"><i class="el-icon-download"></i></div>
+        <script type="text/javascript">
+            const meta_mapping = {};
+            for(const item of document.getElementsByTagName("meta")){
+                meta_mapping[item.name] = item.content;
+            }
+
+            if(meta_mapping["view-name"] != null){
+                document.title = "trex - " + meta_mapping["view-name"];
+            }
+
+            const svg_url = meta_mapping["view-svg-path"];
+            function register_event(){
+                window.addEventListener("mousewheel", (e)=>{
+                    if(!(e.metaKey || e.ctrlKey)){
+                        return;
+                    }
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if(e.deltaY < 0)
+                        zoom(0.15, e.x, e.y);
+                    else
+                        zoom(-0.15, e.x, e.y);
+                }, {passive:false});
+
+                document.getElementsByClassName("button-download")[0].addEventListener("click", ()=>{
+                    window.open(svg_url, "_blank");
+                });
+            }
+
+            var global_scale = 1.0;
+            var content_width = 0;
+            var content_height = 0;
+            var container = document.getElementById("svg-container");
+            fetch(svg_url).then(async (resp)=>{
+                const value = await resp.text();
+                container.innerHTML = value;
+                const canvas = container.firstElementChild;
+                content_width = canvas.width.animVal.value;
+                content_height = canvas.height.animVal.value;
+
+                const first_group = canvas.querySelector("g>g");
+                if(first_group != null){
+                    const rect = first_group.getBoundingClientRect();
+                    const parent_rect = container.getBoundingClientRect();
+                    const diff_x = rect.left + rect.width / 2 - parent_rect.left;
+                    const diff_y = rect.top + rect.height / 2 - parent_rect.top - 300;
+                    window.scrollTo({left: diff_x - window.innerWidth / 2, top: diff_y});
+                }
+                register_event();
+            }).catch((reson)=>{
+                console.log(reson);
+            });
+
+            function zoom(scale, cx, cy){
+                const canvas = container.firstElementChild;
+                let new_width = 0;
+                let new_height = 0;
+                let ax = window.scrollX;
+                let ay = window.scrollY;
+                const sb = canvas.getBoundingClientRect();
+                const pb = container.getBoundingClientRect();
+                const diff_x = sb.left - pb.left;
+                const diff_y = sb.top - pb.top;
+                const old_scale = global_scale;
+                global_scale = Math.max(0.05, Math.min(global_scale + scale, 1.5));
+                ax = (cx + ax - diff_x) / old_scale * global_scale - cx + diff_x;
+                ay = (cy + ay - diff_y) / old_scale * global_scale - cy + diff_y;
+                new_width  = content_width * global_scale;
+                new_height = content_height * global_scale;
+                canvas.setAttribute("width", new_width);
+                canvas.setAttribute("height", new_height);
+                window.scrollTo({left: ax, top: ay});
+            };
+        </script>
+    </body>
+</html>

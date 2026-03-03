@@ -1,0 +1,20 @@
+input_data_path: ./random_inputs.pt
+outputs: ["@model_outputs"]
+save_path: v6_partA_onnx_report.csv
+
+onnx:
+  onnx_path: /home/qianli/7030_onnx_new/01_v6_unified_model_partA/TASK1111111111111_v6.501_seg_nopark_sim_int8opt_plugin.strongly.partA.onnx
+  action: True
+
+trt:
+  action: False
+  fp16: True
+  fp32_layer_list: []
+  plugins: []
+  dynamic_shape: {}
+
+additional_operation:
+  add_input_name_list: []
+  add_input_data_root: ./save_bin_root/onnxruntime_outputs
+  save_name_list: []
+  save_bin_root: ./save_bin_root

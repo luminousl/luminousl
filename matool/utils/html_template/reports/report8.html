@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>冗余算子统计报告</title>
+    <!-- <link href="main.css" rel="stylesheet" type="text/css"/> -->
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <style>
+      * {
+        box-sizing: border-box;
+        background-color: white;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+
+        /* overflow: hidden; Ensures the page is only scrollable within the iframes */
+      }
+      #div1 {
+        flex: auto;
+        display: flex;
+        flex-direction: column;
+        transform-origin: top left;
+        width: 49%;
+        height: 100vh; /* viewport height */
+        border: none;
+      }
+      #div1_top {
+        flex: auto;
+        transform-origin: top left;
+        width: 100%;
+        height: 10%; /* viewport height */
+        border: none;
+      }
+      #div1_up {
+        flex: auto;
+        transform-origin: top left;
+        width: 100%;
+        height: 30%; /* viewport height */
+        border: none;
+      }
+      #div1_down {
+        flex: auto;
+        transform-origin: top left;
+        width: 100%;
+        height: 69%; /* viewport height */
+        border: none;
+      }
+      #div2 {
+        flex: auto;
+        transform-origin: top left;
+        width: 49%;
+        height: 100vh; /* viewport height */
+        border: none;
+      }
+    </style>
+    <div id="div1" style="position: relative">
+      <div id="div1_top" style="position: relative; display: flex">
+        <div
+          id="div1_top_left"
+          style="flex: auto; width: 50%; transform-origin: top left"
+        >
+          <ul>
+            <li>
+              reformatting算子个数：
+              <strong id="num1"> 200 </strong>
+            </li>
+            <li>
+              输入输出同精度reformatting算子个数：
+              <strong id="num2"> 20 </strong>
+            </li>
+          </ul>
+        </div>
+        <div
+          id="div1_top_right"
+          style="flex: auto; width: 50%; transform-origin: top left"
+        >
+          <ul>
+            <li>
+              PWN算子个数：
+              <strong id="num3"> 20 </strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div id="div1_up" style="position: relative; display: flex">
+        <div id="div1_up_left" style="flex: 50%;overflow: auto; transform-origin: top left">
+          <iframe
+            id="pic_reformat"
+            scrolling="yes"
+            src="../graphs/reformatting nodes statistical chart.html"
+            style="
+              transform: scale(0.75);
+              height: calc(100% / 0.65  );
+              width: calc(100% / 0.75);
+              transform-origin: 0 0;
+            "
+          >
+          </iframe>
+        </div>
+        <div id="div1_up_right" style="flex: 50%;overflow: auto; transform-origin: top left">
+          <iframe
+            id="pic_PWN"
+            scrolling="yes"
+            src="../graphs/PWN statistical chart.html"
+            style="
+              transform: scale(0.75);
+              height: calc(100% / 0.65);
+              width: calc(100% / 0.75);
+              transform-origin: 0 0;
+            "
+          >
+          </iframe>
+        </div>
+      </div>
+      <div id="div1_down" style="position: relative; display: flex">
+        <div
+          id="div1_down_left"
+          style="flex: 50%; width: 50%; transform-origin: top left"
+        >
+          <iframe
+            id="reformat_df"
+            scrolling="yes"
+            src="../graphs/reformatting dataframe.html"
+            style="
+              height: calc(100% / 0.8);
+              width: calc(100% / 0.8);
+              transform: scale(0.8);
+              transform-origin: 0 0;
+            "
+          >
+          </iframe>
+        </div>
+        <div
+          id="div1_down_right"
+          style="flex: 50%; width: 50%; transform-origin: top left"
+        >
+          <iframe
+            id="PWN_df"
+            scrolling="yes"
+            src="../graphs/PWN dataframe.html"
+            style="
+              height: calc(100% / 0.8);
+              width: calc(100% / 0.8);
+              transform: scale(0.8);
+              transform-origin: 0 0;
+            "
+          >
+          </iframe>
+        </div>
+      </div>
+    </div>
+    <!-- <iframe id="html2" src="engine.svg"></iframe> -->
+    <div id="div2" style="position: relative">
+      <iframe
+        id="svg"
+        src="../structure/engine.svg"
+        style="
+          position: absolute;
+          height: calc(100% / 0.65);
+          width: calc(100% / 0.65);
+          transform: scale(0.65);
+          transform-origin: 0 0;
+        "
+      >
+      </iframe>
+    </div>
+    <script>
+      function scrollToElement(id) {
+        var iframe = document.getElementById("svg");
+        var innerDoc = iframe.contentDocument;
+        var target = innerDoc.getElementById(id);
+        target.scrollIntoView();
+      }
+    </script>
+    <script>
+      var iframe = document.getElementById("pic");
+      iframe.addEventListener("click", function () {
+        window.open(iframe.src);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,245 @@
+/* 设置整个页面高度和背景颜色 */
+body {
+    height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+    font-family: Arial, sans-serif; /* 使用指定字体 */
+}
+
+/* 设置页头样式 */
+header {
+    background-color: #0074d9;
+    color: white;
+/*            padding: 20px;*/
+    text-align: center;
+    height: 120px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+/* 设置按钮容器样式 */
+.button-container {
+    text-align: center;
+    margin-top: 10px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.layout-buttons{
+    width: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: right;
+}
+
+.function-buttons{
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+
+
+/* 设置按钮样式 */
+.LayoutButton {
+    background-color: #0074d9;
+    color: white;
+    border: none;
+    height:45px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: 'Arial Black', Gadget, sans-serif;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 10px; /* 间距 */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5); /* 按钮阴影效果 */
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* 鼠标悬浮时放大按钮 */
+.LayoutButton:hover {
+    transform: scale(1.1);
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.7);
+}
+
+/* 设置网格容器，3列自动适应行布局 */
+.grid-container-0 {
+    display:flex;
+}
+
+#gridContainer-1-1{
+    flex:1;
+    max-width: 48vw;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(auto-fill, 1fr);
+    gap: 30px;
+    padding: 20px;
+    overflow-y: auto;
+    overflow-x: auto;
+    background-color: #f0f0f0;
+    background-color: #D3D3D3;
+    min-height: 100vh;
+}
+
+#gridContainer-1-2{
+    flex:6;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(auto-fill, 1fr);
+    gap: 30px;
+    padding: 20px;
+/*            overflow-y: auto;*/
+    background-color: #f0f0f0;
+    max-width:100%;
+}
+
+
+
+
+/* 设置单元格样式 */
+.grid-item-1 {
+    width: auto;
+    height: 80vh;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+/*            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);*/
+}
+
+
+/* 设置单元格样式 */
+.grid-item-2 {
+    width: auto;
+    max-width: 100%;
+    height: 40vh;
+    max-height:100%;
+    overflow: hidden;
+    background-color: #f0f0f0;
+/*            background-color: red;*/
+    border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+.grid-item-3 {
+    width: auto;
+    height: 40vh;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+/*            overflow: hidden;*/
+/*            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);*/
+}
+
+/* 设置图像样式 */
+.grid-item img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+}
+
+.image-link{
+    text-decoration: none;
+/*    background-color: red;*/
+}
+
+.button-link{
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+}
+
+/* 设置标题文本的样式 */
+.model-title {
+    font-size: 24px; /* 设置字体大小 */
+    color: #333; /* 设置文本颜色 */
+    font-weight: bold; /* 加粗文本 */
+    text-indent: 20px;
+    margin-top: 0px; /* 设置标题与图像之间的顶部间距 */
+    margin-bottom: 5px; /* 设置标题与图像之间的顶部间距 */
+    margin-left: 5px;
+    text-align: left; /* 文本居中对齐 */
+    text-transform: uppercase; /* 将文本转换为大写 */
+    letter-spacing: 1px; /* 字母间距 */
+    font-family: 'Arial', sans-serif; /* 指定字体 */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* 文本阴影效果 */
+    background-color: #fff; /* 文本背景颜色 */
+/*    padding: 5px; /* 文本内边距 */*/
+    border-radius: 10px; /* 圆角边框 */
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); /* 按钮阴影效果 */
+    text-decoration: none;
+/*    background-color: red;*/
+}
+
+.model-title:hover {
+    transform: scale(1.02);
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 悬浮效果 */
+.iframe-item{
+/*    background-color: red;*/
+    border: none;
+    border-radius: 10px; /* 圆角边框 */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* 按钮阴影效果 */
+    transition: transform 0.1s;
+    height:42vh;
+/*            transform: scale(1.5);*/
+}
+
+/* 悬浮效果 */
+.iframe-item:hover {
+    transform: scale(1.00);
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+
+.image-wrapper {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    text-align: center;
+    overflow: hidden;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+/*            margin-top: 10px*/
+}
+
+.image-wrapper:hover {
+    transform: scale(1.02);
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.content-image {
+    transform: rotate(-90deg);
+/*            max-height:48vw;*/
+/*            max-width:20vh;*/
+    width: 20vh;
+    height:auto;    
+}
+
+.inframeContainer {
+    height:35vh;
+    overflow: hidden;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.inframeContainer:hover {
+    transform: scale(1.02);
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+}
+

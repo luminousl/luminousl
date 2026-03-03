@@ -1,0 +1,111 @@
+/* 设置整个页面高度和背景颜色 */
+body {
+    height: 100%;
+/*    background-color: red;*/
+    margin: 0;
+    font-family: Arial, sans-serif; /* 使用指定字体 */
+}
+
+
+/* 设置网格容器，3列自动适应行布局 */
+.grid-container-0 {
+    display:flex;
+/*    background-color: red;*/
+/*    height: 100%;*/
+}
+
+#gridContainer-1-1{
+    flex:1;
+/*    max-width: 48vw;*/
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+/*    gap: 30px;*/
+/*    padding: 10px;*/
+    padding-top: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    overflow-y: auto;
+    overflow-x: auto;
+    background-color: #f0f0f0;
+    background-color: #D3D3D3;
+    height: 100vh;
+}
+
+#gridContainer-1-2{
+    flex:2;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    gap: 30px;
+/*    padding: 10px;*/
+    padding-top: 5px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+/*            overflow-y: auto;*/
+/*    background-color: #f0f0f0;*/
+    background-color: #D3D3D3;
+/*    max-width:100%;*/
+}
+
+/* 设置单元格样式 */
+.grid-item-1 {
+    width: auto;
+    height: 97%;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+/*            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);*/
+}
+
+
+.grid-item-2 {
+    width: auto;
+    height: 97%;
+/*    background-color: #f0f0f0;*/
+    border-radius: 5px;
+/*            overflow: hidden;*/
+/*            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);*/
+}
+
+
+
+.image-link{
+    text-decoration: none;
+}
+
+
+.item-report{
+    background-color: white;
+    border: none;
+    border-radius: 10px; /* 圆角边框 */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* 按钮阴影效果 */
+}
+
+.item-report:hover {
+    transform: scale(1.00);
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.iframe-item{
+    position: absolute;
+/*    top: 0vh;*/
+/*    left: 0vw;*/
+    background-color: white;
+/*    margin-top:2.5vh;*/
+    border: none;
+    border-radius: 10px; /* 圆角边框 */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* 按钮阴影效果 */
+    transition: transform 0.1s;
+    width: 131vw; 
+    height: 194vh;
+    transform-origin: top left; 
+    transform: scale(0.5, 0.5);
+}
+
+/* 悬浮效果 */
+.iframe-item:hover {
+/*    transform: scale(1.00);*/
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+}

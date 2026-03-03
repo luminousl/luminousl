@@ -1,0 +1,56 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        <link rel="stylesheet" href="/static/element-ui.css">
+        <link rel="icon" href="/static/favicon.jpg" sizes="32x32" />
+        <style type="text/css">
+            body{margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "PingFang SC"; text-rendering: geometricPrecision; font-size: 13px;}
+            #screen{font-size: 15px}
+            #graph-container{text-align: center; width: 50%; user-select: none; position: fixed; height: 100%; display: inline-block; overflow: scroll}
+            #operation-plane{width: 50%; height: 100%; position: fixed; right: 0; top: 0}
+            #select-nodes-info{position: fixed; display: none; left: 10px; top: 10px; padding: 10px; background-color: #fffc; pointer-events: none}
+            .g-node.io-tensor-node > .g-node-background{fill: #dbdcdb; stroke-width: 1; stroke: #000}
+            .g-node.io-tensor-node > .g-node-title{fill: #000;}
+            .g-node.operator-node > .g-node-background{fill: #000; stroke-width: 1; stroke: #000}
+            .g-node.operator-node > .g-node-title{fill: #fff;}
+            .g-node-link {stroke:#000; stroke-width:0.08em; fill: none}
+            .g-node-link:hover{stroke: #f00; pointer-events: stroke; cursor: pointer;}
+            .g-node-link-shape {font-size: 12px}
+            .g-node{cursor: pointer}
+            .g-node-focused > .g-node-background{stroke-width: 5 !important; stroke: #f00 !important}
+            .g-node-focused-highlight > .g-node-background{stroke-width: 5 !important; stroke: #00ff85 !important}
+            .g-node-focused-compared > .g-node-background{stroke-width: 5 !important; stroke: rgb(255, 0, 251) !important}
+            .g-node-focused-compared-highlight > .g-node-background{stroke-width: 5 !important; stroke: #0085ff !important}
+            #select-nodes-bbox{position: fixed;left: 0; top: 0; border: 2px solid #f00; background-color: #0002; z-index: 999; user-select: none; pointer-events: none;}
+        </style>
+        <script type="text/javascript" src="/static/vue.js"></script>
+        <script type="text/javascript" src="/static/element-ui.js"></script>
+        <meta name="onnx-json-url" content="/static/02_vision_2nd-sg12.json"/>
+    </head>
+    <body>
+        <div id="addition-ui">
+            <div id="graph-container">
+                <svg id="screen" width="1000" height="2000" xmlns="http://www.w3.org/2000/svg" version="1.1">
+                    <defs>
+                        <marker
+                        id="arrow"
+                        viewBox="0 0 10 10"
+                        refX="5"
+                        refY="5"
+                        markerWidth="6"
+                        markerHeight="6"
+                        orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" />
+                        </marker>
+                    </defs>
+                </svg>
+                <div id="select-nodes-bbox"></div>
+            </div>
+            <div id="operation-plane">
+                sdfasfasf
+            </div>
+        </div>
+        <script type="module" src="/static/graph.js"></script>
+        <script type="module" src="/static/editor.js"></script>
+    </body>
+</html>

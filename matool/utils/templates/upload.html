@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <style>
+        body {
+            height: 100vh;
+            font-size: 1.5vw;
+            font-weight: bold;
+            background-color: #f0f0f0;
+            margin: 0;
+            font-family: Arial, sans-serif; /* 使用指定字体 */
+        }
+        header {
+            background-color: #0074d9;
+            color: white;
+            text-align: center;
+            height: 12vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* margin: 0px; */
+            font-size: 2vh;
+        }  
+        .grid-container-0 {
+            display:flex;
+        }
+
+        .grid-container-1 {
+            grid-template-rows: 100px;
+            min-height: 100vh;
+        }
+
+        #gridContainer-1-1{
+            max-width: 10vw;
+            flex:1;
+/*            padding-left:30px;*/  
+            gap: 0px;
+            padding: 0px;
+            max-width: 50vw;
+            align-items: start;
+            background-color: #D3D3D3;
+        }
+
+        #gridContainer-1-2{
+            flex:2;
+            gap: 0px;
+            padding: 0px;
+            /* max-width: 25vw; */
+            align-items: center;
+            
+        }
+
+        .button-link{
+            text-decoration: none;
+            color: white;
+            text-align: center;
+        }
+
+        .LayoutButton {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #0074d9;
+            color: white;
+            border: none;
+            height: 5vh;
+            width: 15vw;
+            /* padding: 10px 20px; */
+            font-size: 1vw;
+            font-weight: bold;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            cursor: pointer;
+            border-radius: 0.5vw;
+            margin: 0.5vw;
+            box-shadow: 0vw 0.2vw 0.3vw rgba(0, 0, 0, 0.5); /* 按钮阴影效果 */
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+
+    </style>
+    <body>
+        <header>
+            <div style="width:100vw "><h1>MATool 在线模型分析工具</h1></div>
+            <!-- <div ><p><br>版本日期：20231101</p></div> -->
+            <!-- <p >版本日期: 20230301</p> -->
+        </header>
+        <div class="grid-container-0">
+            <div class="grid-container-1" id="gridContainer-1-1"></div>
+            <div class="grid-container-1" id="gridContainer-1-2">
+                <form id="upload-form" action="/file_upload">
+                    <div style="border: 0px solid #112d4e">
+                        <p class="board-title">
+                            Step 1: 生成profile文件夹【参考README说明】
+                        </p>
+                        <div style="display: flex;">
+                            <div>
+                                <a href="" download="utils-device.zip" class="button-link">
+                                <div id="button_True"  class="LayoutButton">
+                                    点击下载生成脚本
+                                </div>
+                                </a>
+                            </div>
+                            <div style="background-color: white; border-radius: 0.5vw;">
+                                <p style="font-size: 1.5vh;">
+                                    【脚本使用说明】<br />
+                                    &emsp; 将脚本文件解压至目标设备中，与模型文件配合使用<br />
+                                    【注】该脚本可以在安装有tensorrt的目标设备进行使用，例如orin设备、x86设备等。<br />
+                                    【Case 1】分析对象为onnx模型： <br />
+                                    &emsp; python utils-device/process_onnx.py ***.onnx [trtexec args]<br />
+                                    &emsp; python utils-device/process_onnx.py resnet18.onnx int8 fp16 plugins=./libinferplugin.so <br />
+                                    【Case 2】分析对象为trt egine： <br />
+                                    &emsp; python utils-device/process_trt.py ***.trt [trtexec args]<br />
+                                    &emsp; python utils-device/process_trt.py resnet18.trt int8 fp16 plugins=./libinferplugin.so <br />
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="border: 0px solid #112d4e">
+                        <p class="board-title">
+                            Step 2: 上传Profile文件夹
+                        </p>
+                        <input type="file" class="LayoutButton" id="folder" name="folder" webkitdirectory="" mozdirectory="" />
+                    </div>
+                    <div style="border: 0px solid #112d4e">
+                        <p class="board-title">
+                            Step 3: 生成模型分析报告【约5-10秒】
+                        </p>
+                        <input type="text" id="user-input" placeholder="域账号">
+                        <button type="button" class="LayoutButton" id="upload-button">点击生成报告</button>
+                    </div>
+                    <div style="border: 0px solid #112d4e">
+                        <p class="board-title">
+                            Step 4: 查看模型分析报告
+                        </p>
+                        <div class="LayoutButton">
+                            <a class="button-link" target="_blank" href=http://10.114.138.97:8080/MATool>
+                                <div id="button_True"  class="LayoutButton">
+                                    点击查看报告
+                                </div>
+                            </a>
+                        </div>
+                        
+                    </div>
+                </form>
+            </div>
+            <div class="grid-container-1" id="gridContainer-1-1"></div>
+        </div>
+        
+        <script>
+            document.querySelector('#upload-button').addEventListener('click', function(evt) {
+                evt.preventDefault();  // 阻止默认的表单提交
+                var files = document.querySelector('#folder').files;
+                var userInput = document.querySelector('#user-input').value;
+
+                var userInputFormData = new FormData();
+                userInputFormData.append('user_name',userInput)
+                for (var i = 0; i < files.length; i++) {
+                    userInputFormData.append('files[]', files[i]);
+                }
+                
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST','/py_script',true);
+                xhr.send(userInputFormData);
+            });
+            </script>
+    </body>
+</html>

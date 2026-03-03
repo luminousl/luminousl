@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MATool-模型分析工具-HomePage</title>
+    <link rel="stylesheet" type="text/css" href="ModelBoard.css">
+    <style>
+        /*#test1{
+            background-color: #D3D3D3;
+        }
+
+        #test2{
+            background-color: #FFE4E1;
+        }*/
+
+
+        .sidebar {
+          width: 100%;
+          color: #000; /* 文本颜色 */
+/*          padding: 10px;*/
+        }
+
+        /* 样式化目录项 */
+        .sidebar ul {
+          list-style-type: square;
+          padding: 20px;
+        }
+
+        .sidebar li {
+          margin-bottom: 15px;
+        }
+
+        .sidebar a {
+          text-decoration: none;
+          color: #000;
+          font-family: 'Arial', sans-serif; /* 指定字体 */
+          font-weight: bold; /* 加粗文本 */
+        }
+
+        /* 鼠标悬停时的样式 */
+        .sidebar a:hover {
+          text-decoration: underline;
+        }
+
+        .lili{
+            margin-left: 30px;
+        }
+
+    </style>
+        }
+</head>
+<body>
+    <header>
+        <h1>模型看板</h1>
+    </header>
+
+    <div class="grid-container-0">
+
+        
+        <div class="grid-container-1" id="gridContainer-1-1">
+            <div class="sidebar">
+            <h3>模型目录</h3>
+            <ul>
+                <li><a href="#">环视泊车位 (数量：2)</a></li>
+                <li class="lili"><a href="#">
+                Parking: Ipm_net</a></li>
+                <li class="lili"><a href="#">Parking: Dirty_net</a></li>
+                <li><a href="#">车道线单帧 (数量：1) </a></li>
+                <li class="lili"><a href="#">LSS</a></li>
+                <li><a href="#">激光感知 (数量：1) </a></li>
+                <li class="lili"><a href="#">Lidar</a></li>
+                <li><a href="#">泊车多任务 (数量：1 未获得)</a></li>
+                <li><a href="#">鱼眼障碍物 (数量：1) </a></li>
+                <li class="lili"><a href="#">Parking: Fisheye</a></li>
+                <li><a href="#">2D视觉检测 (数量：1 未获得)</a></li>
+                <li><a href="#">毫米波检测 (数量：1)</a></li>
+                <li class="lili"><a href="#">Radar</a></li>
+                <li><a href="#">视觉多任务 (数量：2)</a></li>
+                <li class="lili"><a href="#">Vision: Mono3d2d</a></li>
+                <li class="lili"><a href="#">Vision: Bev</a></li>
+                <li><a href="#">图像质量 (数量：1)</a></li>
+                <li class="lili"><a href="#">Image_quality</a></li>
+                <!-- 添加更多目录项 -->
+            </ul>
+            </div>
+        </div>
+
+        <div class="grid-container-1" id="gridContainer-1-2">
+
+            <div class="grid-item-2" id="test1">
+                <a href="MATool.html" target="_blank" class="image-link">
+                    <p class="model-title"><环视泊车位> Parking: Ipm_net</p>
+                    <iframe src="source/Abstract_slim.html" width="100%" height="100%" class="iframe-item" scrolling="no"></iframe>
+                </a>
+            </div>
+
+            <div class="grid-item-2" id="test2">
+                <a href="structure/engine.svg" target="_blank" class="image-link">
+                    <p class="model-title"><环视泊车位> Parking: Dirty_net</p>
+                    <div class="image-wrapper">
+                        <img src="structure/engine.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+            </div>
+            <div class="grid-item-2">
+                <a href="structure/engine.svg" target="_blank" class="image-link">
+                    <p class="model-title"><车道线单帧> LSS</p>
+                    <div class="image-wrapper">
+                        <img src="structure/engine.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+            </div>
+
+            <div class="grid-item-2">
+                <a href="structure/engine.svg" target="_blank" class="image-link">
+                    <p class="model-title"><激光感知> Lidar</p>
+                    <div class="image-wrapper">
+                        <img src="structure/engine.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+            </div>
+
+            <div class="grid-item-2">
+                <a href="structure/engine.svg" target="_blank" class="image-link">
+                    <p class="model-title"><泊车多任务> </p>
+                    <div class="image-wrapper">
+                        <img src="structure/engine.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+            </div>
+
+            <div class="grid-item-2">
+                <a href="structure/engine.svg" target="_blank" class="image-link">
+                    <p class="model-title"><鱼眼障碍物> Parking: Fisheye</p>
+                    <div class="image-wrapper">
+                        <img src="structure/engine.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+            </div>
+
+            <div class="grid-item-2">
+                <a href="structure/engine.svg" target="_blank" class="image-link">
+                    <p class="model-title"><2D视觉检测> </p>
+                    <div class="image-wrapper">
+                        <img src="structure/engine.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+            </div>
+
+            <div class="grid-item-2">
+                <a href="structure/engine.svg" target="_blank" class="image-link">
+                    <p class="model-title"><毫米波检测> Radar</p>
+                    <div class="image-wrapper">
+                        <img src="structure/engine.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+            </div>
+
+
+            <div class="grid-item-2">
+                <a href="structure/engine.svg" target="_blank" class="image-link">
+                    <p class="model-title"><视觉多任务> Vision: Mono3d2d</p>
+                    <div class="image-wrapper">
+                        <img src="structure/engine.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+            </div>
+
+            <div class="grid-item-2">
+                <a href="structure/engine.svg" target="_blank" class="image-link">
+                    <p class="model-title"><视觉多任务> Vision: Bev</p>
+                    <div class="image-wrapper">
+                        <img src="structure/engine.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+            </div>
+
+            <div class="grid-item-2">
+                <a href="structure/engine.svg" target="_blank" class="image-link">
+                    <p class="model-title"><图像质量> Image_quality</p>
+                    <div class="image-wrapper">
+                        <img src="structure/engine.svg" alt="图表名称：Convolution Arithmetic Intensity" class="content-image">
+                    </div>
+                </a>
+            </div>
+
+
+            
+            
+        </div>
+
+        <script>
+            const gridContainer = document.getElementById('gridContainer-1-1');
+
+            // 定义HTML文件列表
+            const htmlFiles = [
+                { name: 'report1.html', title: '静态属性报告' },
+                { name: 'report2.html', title: '推理指标报告' },
+            ];
+
+
+            // 页面加载后，生成HTML文件列表
+            function generateHTMLFileList() {
+                // 清空网格容器
+                gridContainer.innerHTML = '';
+
+                // 为每个HTML文件创建一个网格项
+                htmlFiles.forEach(file => {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = './reports/' + file.name;
+                    iframe.width = '100%';
+                    iframe.height = '95%';
+                    iframe.className = 'iframe-item'
+                    iframe.style.whiteSpace = 'nowrap;'
+                    // iframe.style.border = 'none;'
+
+                    const gridItem = document.createElement('div');
+                    gridItem.className = 'grid-item-1';
+                    gridItem.appendChild(iframe);
+
+                    const anchor = document.createElement('a');
+                    anchor.href = './reports/' + file.name;
+                    anchor.target = '_blank';
+                    anchor.className = 'image-link'
+
+
+                    const titleElement = document.createElement('p');
+                    titleElement.textContent = `${file.title}`;  //添加标题内容
+                    titleElement.classList.add('model-title'); // 添加类名
+                    anchor.appendChild(titleElement);
+
+
+                    anchor.appendChild(gridItem);
+
+                    gridContainer.appendChild(anchor);
+                });
+            }
+
+            // 页面加载后，生成HTML文件列表
+            // window.addEventListener('load', generateHTMLFileList);
+        </script>
+    </div>
+</body>
+</html>
