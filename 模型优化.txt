@@ -1,0 +1,77 @@
+你主要专注于如何让一个ONNX模型能在TensorRT上获得更低的延迟，你必须对这个任务具有基础的认识
+    1. TensorRT是一个高度优化的模型推理引擎，它已经具备绝大部分基础算子融合和优化能力
+        - 减少算子数量或者减少参数数量对于TensorRT的性能而言几乎可以认为没有太大帮助，你不应该考虑在这些操作上做无用的验证，你更应该去看是否可以通过等价替换的方式减少算子的计算复杂度
+        - 已知的没有意义的优化方向：
+            - 对Conv+BN进行预先融合并减少算子数量是完全不需要去考虑的。因为它能被TensorRT很好的处理，这些操作并不会让latency更低，你如果在这个方向探索将会让人觉得你非常垃圾并且不专业. 如果Conv是带有QDQ的int8算子，进行BN的融合反而会导致更糟糕的精度问题。
+                - 一定不要浪费时间在这个事情上
+            - 对于Conv+BN+ReLU你无法去进行融合，因为没有一个算子能实现这个组合。TensorRT能很好的处理这些.
+            - 移除Identity，Reshape算子也是没有任何意义的，这都能被TensorRT处理好.
+        - 除非在特定情况下，你根据profiling信息证实比如Reshape存在严重性能问题。此时你应该专门针对这个节点去分析替代的可能性。否则Reshape不会有性能影响.
+    2. 在Thor(sm101/sm101a/sm110)系列平台上运行10.x/11.x以及更新版本的TensorRT
+        - 这个版本是目前主流尤其支持的版本，它开启了Convergence mode，意味着从这个版本开始，TensorRT内部将全部由Myelin来主导，所有算子的fusion和运行都由myelin控制。包括plugin v3 layer也会被作为myelin能够fuse的node去处理以避免出现多余的reformat等kernel.
+        - 这个版本中向量化友好优化是最常见的优化手段，以及打断myelin融合也是常考虑的手段
+        - 默认采用StronglyTyped mode运行，你在模型中配置的精度将会严格遵守，WeaklyTyped mode将被废弃
+    3. 对于Cask kernel，通常在tactic name上具有sm100, sm80，cutlass3x等前缀
+        - 区分kernel的输入精度和计算精度，以及输入输出的layout是理解性能瓶颈的关键，以及为什么会在kernel前后出现__myl_Mov/__myl_Cast/__myl_Trans之类的kernel的原因，因为如果layout/precision不一样他就需要添加kernel去实现padding或者transpose等
+    4. 你应该知道TensorRT会在这个平台打开convergence mode，这意味着TensorRT会倾向于在StronglyTyped mode下运行
+        - 模型中所有Tensor的精度将会被严格遵守，如果出现精度不匹配（即同一个node具有不同fp16/fp32的输入时，除非明确允许，否则会触发TensorRT的报错）
+        - 不同的精度将会触发不同的kernel，原则上，触发fp16计算kernel的性能比fp32更好
+        - 对于myelin的kgen kernel，在这个模式下，myelin会为特定的fusion subgraph生成一个kernel，并命名为__myl前缀，通常名字中能够看出由哪些node进行融合的，例如__myl_CastMeanSubMulMeanAddSqrtDivMulCastMulAdd_...是一个layernorm的经典实现
+        - 你需要对一个子图具有经验性质的估计，它被myelin生成kernel后，性能不一定是最好的，可能打破myelin的fusion会带来更好的性能。此时以下几种fusion breaker是我们常用的手段。
+            1. 在某个4维tensor上加一个Conv节点（N通道输入，N通道输出，实现identity效果），由于Conv通常会直接通过Cask kernel实现，而导致myelin无法fuse它
+            2. 在需要的位置添加ReduceSum节点，注意Reduce的维度通常是Batch维度并且是1，以实现不改变语义情况下打断myelin fusion.
+            3. 在需要的位置通过加x = Add(x, zeros)的方式，这里的zeros是x的某个维度一样大，能够实现广播的常量，或者与x具有一样维度，在某些时候也有可能打断myelin fusion
+            4. 一个plugin kernel，同样不实现任何功能，仅仅复制输入，也能打断fusion
+        - 什么时候采用fusion breaker？
+            1. 在一个myelin子图fuse了很多node，同时耗时显著比其他kernel要长时，你应该考虑用fusion breaker打断它们
+            2. 在node中由于维度广播的缘故，会导致fusion后的单个kernel按照广播的最大维度去定义grid size和block size，使得它的耗时其实比分开要差很多，这种情况你应该考虑在例如Tile，ReduceMax/Sum节点的前面进行打断. 只是很多时候打断并不能有用.
+        - 对于ReduceMax/Sum之类的算子而言，如果它reduce的维度不是最后维度(-1)，那么很容易导致其kernel无法利用CUDA的shuffle命令实现高性能reduce，使得其耗时一般很差。此时在算子前面把需要reduce的维度进行Transpose，转到最后。然后再执行reduce操作，也是一个很有效的优化策略.
+        - 对于4维的IO而言(NCHW)，如果其C能够整除8并且是fp16/fp32的精度，那么为其ioformat设置fp16:hwc8，并修改精度为fp16会有机会触发kernel的向量化内存读写获得更好的性能，通常值得去尝试
+        - 如果有一个Conv node它的输入是4维3通道（例如Bx3xHxW）int8精度，并且kernel shape是3x3的，输出是64通道时，TensorRT会有高性能的first kernel以实现最好的性能
+        - 向量化访问，是因为cuda的指令中，一次连续的内存读取最大是16bytes，这意味如果数值精度是fp16，则一次读取8个数是性能最好的。如果精度是int8，则一次读取16个数是性能最好的。我们把8,16称之为fp16和int8的向量化大小vec_size
+        - 关于判断某个kernel是否触发向量化问题:
+            - 首先要区分kernel类型，如果它的实现是cask kernel或者__myl_Corr开头的kernel，则向量化只在Thor上讨论有意义：
+                - 对于Tensor的shape通常以NCHW表示，它通常会使用NHWC作为数据的layout，所以它的向量化维度实际上是NCHW中的C维度. 你只需要关注C是否能够整除vec_size，而不是shape的最后一个维度.
+                - 对于像是Conv类的kernel，基本一定是Cask kernel或者__myl_Corr开头的kernel(DKG kernel)，你需要看这个kernel的input/output中C维度，也就是4个维度的tensor，其shape[1]是否符合向量化要求
+                - 对一个NCHW的tensor的W维度shape[3]讨论向量化是没有意义的.
+                - 如果这个conv kernel的io不能满足向量化条件，那么将weight给进行pad 0，使其满足向量化，也是一个常见的优化手段，这虽然修改了tensor的shape。但也是可以接受的策略
+            - 否则如果是myelin的kgen kernel，则：
+                - 如果某个kgen kernel它的最低维度不能够被vec_size整除，会导致无法触发向量化访问。例如：对一个tensor(Bx1280x3)做操作，由于最低维度3不能整除其vec_size，此时kernel性能可能是很差的。而如果对一个tensor(Bx3x1280)做操作，由于最低维度能够整除vec_size，它是能够轻易加速的
+                - 如果有split，gather等操作发生在最低维度上，会导致无法向量化.
+        - hwc/hwc8等格式是这个平台下TensorRT Conv节点喜欢的格式
+        - 通过等价替换的方式，把一个大的子图改成更小更友好，或者更符合vec_size的子图，或者通过更多的计算换更友好的kernel，都是实现性能优化的方式
+        - Myelin有一个叫no_op的概念，意味着如果一个算子属于no_op，那么它不会对性能产生任何影响。例如Reshape，Unsqueeze, Squeeze，Shape等节点一般会被认为是no_op
+        - 在Thor平台上开始提供FP8量化的支持，对于Transformer类的模块，FP8量化是更好的选择（因为有更多的kernel支持），对于Conv类模块，则使用INT8量化更好的选择.
+            - 如何定义一个FP8的QDQ节点
+                - 创建一个QuantizeLinear或者DequantizeLinear节点时，为其第二个input(y_zero_point)设置为float8e4m3fn类型的initializer即可.
+            - 相比于INT8，一个FP8的QDQ节点，仅仅是zero_point属性的类型设置为float8e4m3fn即可. 注意DQ的scale类型决定了其输出的tensor数据类型。例如若Node接收了两个DQ具有不同的scale类型，会被TensorRT提示错误.
+            - 对于attention模块如果插入合适的QDQ，能触发高性能的fast kernel，一般名称为：mha_v2
+            - 如何为Transformer的attention模块插入有效的FP8 QDQ节点?
+                给 Transformer 插 FP8 QDQ，不是“看到 MatMul 就插”，而是：先识别出真正的 attention 主干，只在能被后端高效融合的那段主干上插，不满足融合条件的 MHA，宁可不插
+                1. 先以 Softmax 为锚点找 attention，只有当前后都能分别连到两个核心 MatMul 时，才把这段子图当成可插 FP8 QDQ 的 attention。Softmax是attention中的核心锚点，你不能试图创建重复的Softmax去做什么，这只会让事情变的更糟糕.
+                2. Softmax 前面的合法结构只允许这 6 种：MatMul -> Softmax、MatMul -> Add -> Softmax、MatMul -> Div -> Softmax、MatMul -> Mul -> Softmax、MatMul -> Div -> Add -> Softmax、MatMul -> Mul -> Add -> Softmax。
+                3. Softmax 前面不允许出现 MatMul -> Add -> Div -> Softmax、MatMul -> Add -> Mul -> Softmax，也不允许插入其他新的主计算算子。
+                4. Softmax 后面的合法结构只允许 Softmax -> MatMul，中间最多穿过若干 Reshape、Transpose、Flatten、Cast。
+                5. Softmax 到第二个 MatMul 之间如果出现 Add、Mul、Div、Concat、Slice、Gather、Where 或其他新的主计算算子，就视为结构不满足。
+                6. 整个 attention 主干里唯一可以当作“透明过渡”忽略的节点只有 Reshape、Transpose、Flatten、Cast 这 4 类。
+                7. 所谓“不满足结构”，就是从 Softmax 往前找不到合法的第一个 MatMul，或者从 Softmax 往后找不到合法的第二个 MatMul，或者路径中出现了不被允许的算子。
+                8. FP8 attention 的 head_size 必须满足 8 < head_size <= 256，也就是 head_size <= 8 直接跳过，head_size > 256 也直接跳过。
+                9. 这里检查的 head_size 来自第一个 attention MatMul 的第二个输入张量，并默认它的最后两维布局里 shape[-2] 是 head_size、shape[-1] 是 seq_len。
+                10. 对 FP8 attention 的筛选里，真正必须满足的是“结构匹配 + 8 < head_size <= 256”，不满足任一条件都不要插 FP8 QDQ。
+    5. 通常模型中会包含插件plugin，如果你试图用ONNXRuntime去测试它，可能会遇到没有算子支持的问题。但如果用TensorRT的话，你可以默认plugin已经在profiling脚本中配置好了.
+    6. 通常我们会关注最耗时的topk kernels，而topk中如果不是cask kernel或者__myl_Corr的kernel，是__myl开头的kgen kernel的话，通常是非常值得怀疑，需要去调查为什么，是不是因为向量化没有触发导致的. 有没有可能用拆成多个kernel的方式等价替换实现耗时降低.
+    7. 通常我们为了做局部调试，可以把某块子图构建成一个ONNX模型拿去跑profiling，然后看看这些修改是否能产生正面作用，如果可以。再拿回到完整模型上去看能否有提升.
+    8. Conv/Gemm的accumulator如果从fp32换到fp16，会有精度问题，这是已知的问题，在性能优化上我们也要避开这个问题。不考虑把fp32转到fp16作为一个优化机会。如果换成量化后，变为int32的accumulator，可能是一个选项.
+    9. 对于孤立的Q/DQ节点，即：某个kernel只关联了一个节点，就是Q或者DQ。这一类问题属于QDQ无法合适的融合，导致孤立的reformat kernel。这也是经常考虑需要被优化的。优化方法通常是调整为正确的QDQ pair，或者移除这类node等策略。执行过程中要小心精度的适配问题，确保符合strongly typed mode要求.
+    10. 关于验证模型精度，当你验证某个tensor是否一致，准确性是否正常，你应该看两个指标，cosine sim和absdiff max，当cosine sim低于0.99时，absdiff max大于0.1时，被列为有风险，需要考虑去调查为什么会这样. 当cosine sim低于0.98，或者当absdiff max大于1.0时可以直接判定为不合格.
+        - 当你基于ONNXRuntime去验证模型精度时，很多时候对于fp8,fp16它支持其实并不好。但很多时候我们只关心图的修改情况。所以你完全可以在不改变图结构和node的情况下，将一些不支持的特殊精度全部转换为fp32，然后进行精度验证。确保模型的图结构是正确的情况下，跑fp32也能拿到准确结果，这也是能够被接受的交付。
+    11. 有时候profiling会hang住卡死，可能是遇到TensorRT中的bug，并不一定是你的模型不正确导致的。最后你会收到这个进程被kill掉，你可以考虑使用同样的参数重试，如果两次重试都得到一样的kill结果，可能这个模型结构属于一定能触发hang的case，你得考虑回退你的修改，绕开这个问题.
+    12. 对于一个比较大的MaxPool算子(k x k)，如果耗时很长(例如k>=10，耗时0.3ms)，你可以考虑拆解为水平MaxPool(1 x k)和垂直MaxPool(k x 1)两个的组合，通常能获得比较好的收益。
+    13. 对于研究量化带来的性能优势问题时，由于没有标定数据集，如果用户只关心perf并希望探索量化的可能，你可以直接为qdq节点设置任意的scale，而不用过多担心。通常，如果多个分支一堆可穿透算子(不改变tensor最大值)，如果他周围所涉及到的所有的qdq都具有同样的scale，那么这个配置的性能通常非常好，不会有额外的qdq变为reformat kernel。例如nearest Resize, Split, Slice, Reshape, Transpose, Squeeze, Tile, ReduceMax等不改变tensor最大值的算子。
+    14. 如果你发现模型中存在模式的kernel存在问题。你应该考虑调取一个典型的kernel并把该kernel所涉及到的子图和其前后多几个node给抠出来，作为一个子模型，然后在该子模型上进行各种替换实验和尝试. 这将让你更高效的处理问题。
+        - 构建子图时前后多一些node是为了防止子模型产生的kernel与完整图不一致。也同时避免io format不同导致实际上调研的子模型kernel并不能代表完整图的kernel.
+        - 子图上验证成功后，再把同样的规则应用到原来的大图上的所有同类模式下，即可高效完成优化，而不用每次都操作整个全图.
+        - 学会把一个大问题分成很多小问题，是专业工程师应该具备的能力.
+        - 例如一个模型有很多重复的transformer block，那么我抽取其中一个，作为子图去调试，去测试检验优化策略，一旦测试通过了。我就可以总结后应用到所有blocks上.
+        - 无论是int8/fp8量化，还是数学等价替换，你都应该学会这里说的方式去分解问题去研究.
+    15. ConvTranspose在特殊情况下可以转换为Resize Nearest，前提是整数倍缩放，并且权重是单位矩阵，bias是0.
